@@ -2,29 +2,52 @@ package pl.edu.uksw.metronome;
 
 import android.app.Service;
 import android.content.Intent;
+import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
 public class BeepService extends Service {
 
     private static String LOG_S = "MetronomeService";
-    private static String BPM_NAME = "bpm";
-    private static String WORKING_NAME = "working";
-    private Boolean working;
-    private int bpm;
+
+    /*
+     * this class will return the Service instance, MetronomeBinder object will be returned on binding with the MainActivity
+     */
+    public class MetronomeBinder extends Binder {
+
+        BeepService getService() {
+            return BeepService.this;
+        }
+
+    }
+
+    private final IBinder myBinder = new MetronomeBinder();
 
     public void onCreate(){
 
     }
 
     public int onStartCommand(Intent intent, int flags, int Idf) {
-
-        working = intent.getBooleanExtra("working", false);
-        bpm = intent.getIntExtra("bpm", 90);
-        Log.d(LOG_S, "working: " + working + " bpm: " + bpm);
         return Service.START_NOT_STICKY;
     }
 
-    public IBinder onBind(Intent intent) { return null; }
+    @Override
+    public IBinder onBind(Intent intent) {
+        Log.d(LOG_S, "Binding...");
+        return myBinder;
+    }
+
+    public void playBeep(boolean work, int bpm){
+        if(work) {
+            Log.d(LOG_S, "beep, beep, beep " + bpm);
+            playMedia();
+        }
+        else Log.d(LOG_S, "stop");
+    }
+
+    private void playMedia(){
+        MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.beep);
+    }
 
 }
