@@ -41,13 +41,25 @@ public class BeepService extends Service {
     public void playBeep(boolean work, int bpm){
         if(work) {
             Log.d(LOG_S, "beep, beep, beep " + bpm);
-            playMedia();
+            //playMedia();
         }
         else Log.d(LOG_S, "stop");
+//        while(work){
+//            playMedia();
+//        }
     }
 
-    private void playMedia(){
+    /*private void playMedia(){
         MediaPlayer mp = MediaPlayer.create(getApplicationContext(), R.raw.beep);
-    }
+        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mp.reset();
+                mp.release();
+            }
+        });
+        mp.start();
+    }*/
 
 }
