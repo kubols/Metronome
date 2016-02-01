@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     public void faster(View view){
         bpm+=1;
         bpmTextView.setText("" + (bpm));
+        beepService.setBpm(bpm);
     }
 
     /*
@@ -72,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
     public void slower(View view){
         bpm -= 1;
         bpmTextView.setText("" + (bpm));
+        beepService.setBpm(bpm);
     }
 
     /*

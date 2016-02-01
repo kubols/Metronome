@@ -15,6 +15,7 @@ public class BeepService extends Service {
 
     private static String LOG_S = "MetronomeService";
     private final AtomicBoolean running = new AtomicBoolean(false);
+    private int bpm = 90;
 
     /*
      * this class will return the Service instance, MetronomeBinder object will be returned on binding with the MainActivity
@@ -49,7 +50,7 @@ public class BeepService extends Service {
      * bpm (beats per minute to set the tempo)
      * breaks the loop when work equals false
      */
-    public void playBeep(boolean work, final int bpm){
+    public void playBeep(boolean work, int bpm){
         if(work){
             Log.d(LOG_S, "beep, beep, beep " + bpm);
             running.set(true);
@@ -61,7 +62,7 @@ public class BeepService extends Service {
                         Log.d(LOG_S, "inside loop - " + running.get() + " - status");
                         try {
                             playMedia();
-                            Thread.sleep(60000/bpm);
+                            Thread.sleep(60000/checkBpm());
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -87,6 +88,14 @@ public class BeepService extends Service {
         });
         mp.start();
         Log.d(LOG_S, "playing music");
+    }
+
+    private int checkBpm(){
+        return bpm;
+    }
+
+    public void setBpm(int bpm){
+        this.bpm = bpm;
     }
 
 }
