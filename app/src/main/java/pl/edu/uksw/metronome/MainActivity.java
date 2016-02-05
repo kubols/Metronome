@@ -135,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
      * Faster bpm button
      */
     public void increment(){
-        if(bpm >= 30 && bpm < 220) {
+        if(bpm >= 30 && bpm < 200) {
             bpm++;
             bpmTextView.setText("" + (bpm));
             beepService.setBpm(bpm);
@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
      * Slower bpm button
      */
     public void decrement(){
-        if(bpm > 30 && bpm <= 220) {
+        if(bpm > 30 && bpm <= 200) {
             bpm--;
             bpmTextView.setText("" + (bpm));
             beepService.setBpm(bpm);
