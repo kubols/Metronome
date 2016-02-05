@@ -4,11 +4,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -18,6 +21,14 @@ public class MainActivity extends AppCompatActivity {
     private static String WORKING_NAME = "working";
     private boolean work = false;
     TextView bpmTextView;
+
+    private Handler buttonHandler = new Handler();                  //handler to continuous increase or decrease bpm
+    private static int DELAY = 70;                                  //delay time between runnable repeat
+    private boolean incrementing = false;
+    private boolean decrementing = false;
+    Button incrementButton;
+    Button decrementButton;
+
     int bpm = 90;
 
     BeepService beepService = null;                                 //reference to service, initialized on connection to service
@@ -30,6 +41,68 @@ public class MainActivity extends AppCompatActivity {
 
         bpmTextView = (TextView)findViewById(R.id.bpmTextView);
         bpmTextView.setText("" + (bpm));
+
+        /*
+         * increment button listeners
+         */
+        incrementButton = (Button)findViewById(R.id.incrementButton);
+        // long press
+        incrementButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                incrementing = true;
+                buttonHandler.post(new ButtonsLongPressHandler());
+                return false;
+            }
+        });
+        // cancel press
+        incrementButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if ((event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) && incrementing) {
+                    incrementing = false;
+                }
+                return false;
+            }
+        });
+        // click
+        incrementButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                increment();
+            }
+        });
+
+        /*
+         * decrement button listeners
+         */
+        decrementButton = (Button)findViewById(R.id.decrementButton);
+        // long press
+        decrementButton.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                decrementing = true;
+                buttonHandler.post(new ButtonsLongPressHandler());
+                return false;
+            }
+        });
+        // cancel press
+        decrementButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if ((event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) && decrementing) {
+                    decrementing = false;
+                }
+                return false;
+            }
+        });
+        // click
+        decrementButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                decrement();
+            }
+        });
     }
 
     @Override
@@ -52,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         if (serviceConnected) {
             unbindService(connection);
-            stopService(new Intent(this, BeepService.class));           // service is stopped only when application is closed properly
+            stopService(new Intent(this, BeepService.class));           // service is stopped only when application is completely closed
             serviceConnected = false;
         }
         super.onDestroy();
@@ -61,19 +134,23 @@ public class MainActivity extends AppCompatActivity {
     /*
      * Faster bpm button
      */
-    public void faster(View view){
-        bpm+=1;
-        bpmTextView.setText("" + (bpm));
-        beepService.setBpm(bpm);
+    public void increment(){
+        if(bpm >= 30 && bpm < 220) {
+            bpm++;
+            bpmTextView.setText("" + (bpm));
+            beepService.setBpm(bpm);
+        }
     }
 
     /*
      * Slower bpm button
      */
-    public void slower(View view){
-        bpm -= 1;
-        bpmTextView.setText("" + (bpm));
-        beepService.setBpm(bpm);
+    public void decrement(){
+        if(bpm > 30 && bpm <= 220) {
+            bpm--;
+            bpmTextView.setText("" + (bpm));
+            beepService.setBpm(bpm);
+        }
     }
 
     /*
@@ -92,6 +169,20 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private class ButtonsLongPressHandler implements Runnable {
+        @Override
+        public void run() {
+            if (incrementing){
+                increment();
+                buttonHandler.postDelayed(new ButtonsLongPressHandler(), DELAY);
+            }
+            else if (decrementing){
+                decrement();
+                buttonHandler.postDelayed(new ButtonsLongPressHandler(), DELAY);
+            }
+        }
+    };
 
     /*
      * class to interact with service

@@ -87,7 +87,7 @@ public class BeepService extends Service {
             }
         });
         mp.start();
-        Log.d(LOG_S, "playing music");
+        Log.d(LOG_S, "playing beep in bpm: " + bpm);
     }
 
     private int checkBpm(){

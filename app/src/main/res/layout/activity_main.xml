@@ -17,12 +17,12 @@
         android:layout_centerInParent="true"
         android:gravity="center">
         <Button
+            android:id="@+id/decrementButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="30dp"
             android:text="-"
-            android:layout_weight="1"
-            android:onClick="slower"/>
+            android:layout_weight="1"/>
         <TextView
             android:id="@+id/bpmTextView"
             android:layout_width="wrap_content"
@@ -32,12 +32,12 @@
             android:gravity="center"
             android:layout_weight="1"/>
         <Button
+            android:id="@+id/incrementButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="30dp"
             android:text="+"
-            android:layout_weight="1"
-            android:onClick="faster"/>
+            android:layout_weight="1"/>
     </LinearLayout>
 
 </RelativeLayout>
