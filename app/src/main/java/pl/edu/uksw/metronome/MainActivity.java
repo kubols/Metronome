@@ -18,6 +18,7 @@ import android.widget.TextView;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
     long start;
     long stop;
 
-    private SQLiteDatabase geodb;
-    private GeoDBOpenHelper dbhelp;
+    private SQLiteDatabase db;
+    private DBOpenHelper dbhelp;
 
 
     DateFormat df = new SimpleDateFormat("dd-MM-yyyy, HH:mm");
@@ -56,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // open DB
-        dbhelp = new GeoDBOpenHelper(this);
-        geodb = dbhelp.getWritableDatabase();
+        dbhelp = new DBOpenHelper(this);
+        db = dbhelp.getWritableDatabase();
 
         bpmTextView = (TextView)findViewById(R.id.bpmTextView);
         bpmTextView.setText("" + (bpm));
@@ -180,10 +181,30 @@ public class MainActivity extends AppCompatActivity {
         if(beepService != null){
             // if metronome is not ticking, start
             if(!work) {
+                start = System.currentTimeMillis();
+                datestart = df.format(Calendar.getInstance().getTime());
+
                 work = true;
                 beepService.playBeep(work, bpm);
             }
             else {
+                stop = System.currentTimeMillis();
+                long time = stop - start;
+                long sec = time/1000;
+                long min = sec/60;
+                long hour = min/60;
+                sec = sec%60;
+                min = min%60;
+
+                if(hour > 0)
+                    lastedtime += Long.toString(hour)+"h"+" ";
+                if(min > 0)
+                    lastedtime += Long.toString(min)+"min"+" ";
+                if(sec > 0)
+                    lastedtime += Long.toString(sec)+"s"+" ";
+
+                insertEntry();
+                lastedtime = "";
                 work = false;
                 beepService.playBeep(work, bpm);
             }
@@ -192,9 +213,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void insertEntry() {
         ContentValues cv = new ContentValues();
-        cv.put(GeoDBOpenHelper.date, datestart);
-        cv.put(GeoDBOpenHelper.lasted, lastedtime);
-        geodb.insert(GeoDBOpenHelper.TABLE_NAME, null, cv);
+        cv.put(DBOpenHelper.date, datestart);
+        cv.put(DBOpenHelper.lasted, lastedtime);
+        db.insert(DBOpenHelper.TABLE_NAME, null, cv);
         Log.d("cos", "a new entry was inserted:");
     }
 
