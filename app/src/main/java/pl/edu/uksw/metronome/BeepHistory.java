@@ -4,7 +4,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.TextView;
 
 /**
@@ -12,8 +11,8 @@ import android.widget.TextView;
  */
 public class BeepHistory extends AppCompatActivity {
 
-    private SQLiteDatabase geodb;
-    private GeoDBOpenHelper dbhelp;
+    private SQLiteDatabase db;
+    private DBOpenHelper dbhelp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,8 +20,8 @@ public class BeepHistory extends AppCompatActivity {
         setContentView(R.layout.activity_beephistory);
 
         // OPEN DB
-        dbhelp = new GeoDBOpenHelper(this);
-        geodb = dbhelp.getWritableDatabase();
+        dbhelp = new DBOpenHelper(this);
+        db = dbhelp.getWritableDatabase();
 
         TextView listContent = (TextView)findViewById(R.id.historylist);
         String history = viewAllEntries();
@@ -40,7 +39,7 @@ public class BeepHistory extends AppCompatActivity {
 
 
     public String viewAllEntries() {
-        Cursor resultOfQuery = geodb.query(GeoDBOpenHelper.TABLE_NAME, GeoDBOpenHelper.columns, null, null, null, null, null);
+        Cursor resultOfQuery = db.query(DBOpenHelper.TABLE_NAME, DBOpenHelper.columns, null, null, null, null, null);
         resultOfQuery.moveToFirst();
         String result = "";
         while(!resultOfQuery.isAfterLast()) {
