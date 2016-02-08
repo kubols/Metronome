@@ -1,9 +1,11 @@
 package pl.edu.uksw.metronome;
 
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +15,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,10 +39,25 @@ public class MainActivity extends AppCompatActivity {
     BeepService beepService = null;                                 //reference to service, initialized on connection to service
     boolean serviceConnected = false;                               //boolean variable if service is bounded
 
+    long start;
+    long stop;
+
+    private SQLiteDatabase geodb;
+    private GeoDBOpenHelper dbhelp;
+
+
+    DateFormat df = new SimpleDateFormat("dd-MM-yyyy, HH:mm");
+    String datestart = "";
+    String lastedtime = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // open DB
+        dbhelp = new GeoDBOpenHelper(this);
+        geodb = dbhelp.getWritableDatabase();
 
         bpmTextView = (TextView)findViewById(R.id.bpmTextView);
         bpmTextView.setText("" + (bpm));
@@ -168,6 +188,20 @@ public class MainActivity extends AppCompatActivity {
                 beepService.playBeep(work, bpm);
             }
         }
+    }
+
+    public void insertEntry() {
+        ContentValues cv = new ContentValues();
+        cv.put(GeoDBOpenHelper.date, datestart);
+        cv.put(GeoDBOpenHelper.lasted, lastedtime);
+        geodb.insert(GeoDBOpenHelper.TABLE_NAME, null, cv);
+        Log.d("cos", "a new entry was inserted:");
+    }
+
+    public void checkHistory(View view)
+    {
+        Intent myIntent = new Intent(this, BeepHistory.class);
+        startActivity(myIntent);
     }
 
     private class ButtonsLongPressHandler implements Runnable {
