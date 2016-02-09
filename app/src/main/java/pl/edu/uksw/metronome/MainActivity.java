@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     Button incrementButton;
     Button decrementButton;
 
-    int bpm = 90;
+    int bpm = 0;
 
     BeepService beepService = null;                                 //reference to service, initialized on connection to service
     boolean serviceConnected = false;                               //boolean variable if service is bounded
@@ -132,6 +132,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         bindService(new Intent(this, BeepService.class), connection, Context.BIND_AUTO_CREATE);
         startService(new Intent(this, BeepService.class));
+        Log.d(LOG, "onStart");
     }
 
     @Override
@@ -141,6 +142,7 @@ public class MainActivity extends AppCompatActivity {
             unbindService(connection);
             serviceConnected = false;
         }
+        Log.d(LOG, "onStop");
     }
 
     @Override
@@ -157,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
      * Faster bpm button
      */
     public void increment(){
-        if(bpm >= 30 && bpm < 220) {
+        if(bpm >= 30 && bpm < 200) {
             bpm++;
             bpmTextView.setText("" + (bpm));
             beepService.setBpm(bpm);
@@ -168,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
      * Slower bpm button
      */
     public void decrement(){
-        if(bpm > 30 && bpm <= 220) {
+        if(bpm > 30 && bpm <= 200) {
             bpm--;
             bpmTextView.setText("" + (bpm));
             beepService.setBpm(bpm);
@@ -250,6 +252,9 @@ public class MainActivity extends AppCompatActivity {
             Log.d(LOG, "Service connected");
             beepService = ((BeepService.MetronomeBinder)service).getService();
             serviceConnected = true;
+            bpm = beepService.getBpm();                                                             //get bpm from service on connection with service
+            bpmTextView.setText("" + (bpm));                                                        //set textView
+            work = beepService.getRunning();                                                        //get boolean work from service
         }
 
         @Override
