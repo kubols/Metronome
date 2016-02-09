@@ -4,9 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -62,7 +60,7 @@ public class BeepService extends Service {
                         Log.d(LOG_S, "inside loop - " + running.get() + " - status");
                         try {
                             playMedia();
-                            Thread.sleep(60000/checkBpm());
+                            Thread.sleep(60000/ getBpm());
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -90,12 +88,17 @@ public class BeepService extends Service {
         Log.d(LOG_S, "playing beep in bpm: " + bpm);
     }
 
-    private int checkBpm(){
+    public int getBpm(){
         return bpm;
     }
 
     public void setBpm(int bpm){
         this.bpm = bpm;
+    }
+
+    public boolean getRunning(){
+        if(running.get()) return true;
+        else return false;
     }
 
 }
