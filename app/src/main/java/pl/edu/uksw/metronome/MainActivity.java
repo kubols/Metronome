@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     long start;
     long stop;
+    long time;
 
     private SQLiteDatabase db;
     private DBOpenHelper dbhelp;
@@ -191,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
             }
             else {
                 stop = System.currentTimeMillis();
-                long time = stop - start;
+                time = stop - start;
                 long sec = time/1000;
                 long min = sec/60;
                 long hour = min/60;
@@ -217,6 +218,7 @@ public class MainActivity extends AppCompatActivity {
         ContentValues cv = new ContentValues();
         cv.put(DBOpenHelper.date, datestart);
         cv.put(DBOpenHelper.lasted, lastedtime);
+        cv.put(DBOpenHelper.lastedseconds, time);
         db.insert(DBOpenHelper.TABLE_NAME, null, cv);
         Log.d("cos", "a new entry was inserted:");
     }
