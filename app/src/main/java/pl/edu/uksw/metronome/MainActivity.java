@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private DBOpenHelper dbhelp;
 
 
-    DateFormat df = new SimpleDateFormat("dd-MM-yyyy, HH:mm");
+    DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm");
     String datestart = "";
     String lastedtime = "";
 
@@ -216,11 +216,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void insertEntry() {
         ContentValues cv = new ContentValues();
-        cv.put(DBOpenHelper.date, datestart);
-        cv.put(DBOpenHelper.lasted, lastedtime);
-        cv.put(DBOpenHelper.lastedseconds, time);
-        db.insert(DBOpenHelper.TABLE_NAME, null, cv);
-        Log.d("cos", "a new entry was inserted:");
+        // check if date is not empty
+        if(datestart.length() > 9 && time > 1000) {
+            cv.put(DBOpenHelper.date, datestart);
+            cv.put(DBOpenHelper.lasted, lastedtime);
+            cv.put(DBOpenHelper.lastedseconds, time);
+            db.insert(DBOpenHelper.TABLE_NAME, null, cv);
+            Log.d("cos", "a new entry was inserted:");
+        }
     }
 
     public void checkHistory(View view)
