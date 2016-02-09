@@ -17,14 +17,16 @@ public class DBOpenHelper  extends SQLiteOpenHelper {
     final static String _ID = "id";
     final static String date = "date";
     final static String lasted = "lasted";
-    final static String columns[] = {_ID,date,lasted};
+    final static String lastedseconds = "lastedseconds";
+    final static String columns[] = {_ID,date,lasted, lastedseconds};
 
     private Context theContext;
 
     final static String CREATE_TABLE = "CREATE TABLE "+TABLE_NAME +"("
             + _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + date + " TEXT, "
-            + lasted + " TEXT)";
+            + lasted + " TEXT,"
+            + lastedseconds + " INT)";
 
 
     @Override
