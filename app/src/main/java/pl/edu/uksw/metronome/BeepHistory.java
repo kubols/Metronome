@@ -1,20 +1,23 @@
 package pl.edu.uksw.metronome;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
  * Created by Herzy on 2016-02-08.
  */
-public class BeepHistory extends AppCompatActivity {
+public class BeepHistory extends AppCompatActivity implements View.OnClickListener {
 
     private SQLiteDatabase db;
     private DBOpenHelper dbhelp;
-    String tmpdate = "temp10leng";
+    String tmpdate = "temp10lengt";
     Integer sumtime[] = new Integer[999];
 
     @Override
@@ -22,22 +25,22 @@ public class BeepHistory extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_beephistory);
 
+        LinearLayout linearLayout = (LinearLayout)findViewById(R.id.history);
+
         // OPEN DB
         dbhelp = new DBOpenHelper(this);
         db = dbhelp.getWritableDatabase();
+        //    db.execSQL("DELETE FROM history WHERE lasted=''");
         String text = "";
-
-        TextView listContent = (TextView)findViewById(R.id.historylist);
-      //  String history = viewAllEntries();
-      //  if (history == "")
-       //     history = "No entries";
-
-        //listContent.setText(history);
 
         String sumhistory[] = viewSumEntries();
         Integer count = 0;
         if(sumhistory[0] == null && sumtime[0] == null)
-            listContent.setText("No entries");
+        {
+            TextView date = new TextView(this);
+            date.setText("No entries");
+            linearLayout.addView(date);
+        }
         else
         {
             while(sumhistory[count] != null)
@@ -56,17 +59,28 @@ public class BeepHistory extends AppCompatActivity {
                 if(sec > 0)
                     lastedtime += Long.toString(sec)+"s"+" ";
 
-                text += sumhistory[count].substring(0,10) + " " + lastedtime + System.getProperty("line.separator");
-                Log.i("cos", sumhistory[count]);
+                TextView date = new TextView(this);
+                date.setText(sumhistory[count].substring(0, 10) + " " + lastedtime + System.getProperty("line.separator"));
+                date.setId(count);
+                date.setOnClickListener(this);
+                linearLayout.addView(date);
+
                 count++;
             }
-            listContent.setText(text);
         }
 
         // CLOSE DB
         dbhelp.close();
+    }
 
+    public void onClick(View v) {
+        TextView tmp = (TextView)v;
+        String tmpdate = tmp.getText().toString();
+        tmpdate = tmpdate.substring(0, 10);
 
+        Intent myIntent = new Intent(this, BeepDayHistory.class);
+        myIntent.putExtra("date", tmpdate);
+        startActivity(myIntent);
     }
 
     public String[] viewSumEntries() {
@@ -78,10 +92,10 @@ public class BeepHistory extends AppCompatActivity {
             long id = resultOfQuery.getLong(0);
             String date = resultOfQuery.getString(1);
             Integer lastedsec = resultOfQuery.getInt(3);
-            Log.i("cos",date +" " + tmpdate);
+            Log.i("coss","d: "+date +" t: " + tmpdate);
             if (date.startsWith(tmpdate.substring(0,10)))
             {
-                sumtime[i] += lastedsec;
+                sumtime[i] += (lastedsec/1000)*1000; // ignore miliseconds
                 Log.i("cos","rowne");
             }
             else
@@ -89,26 +103,10 @@ public class BeepHistory extends AppCompatActivity {
                 i++;
                 result[i] = date;
                 sumtime[i] = 0;
+                sumtime[i] += (lastedsec/1000)*1000; // ignore miliseconds
                 tmpdate = date;
+                Log.i("cos","nierowne");
             }
-            resultOfQuery.moveToNext();
-        }
-        resultOfQuery.close();
-        return result;
-    }
-
-
-    public String viewAllEntries() {
-        Cursor resultOfQuery = db.query(DBOpenHelper.TABLE_NAME, DBOpenHelper.columns, null, null, null, null, null);
-        resultOfQuery.moveToFirst();
-        String result = "";
-        while(!resultOfQuery.isAfterLast()) {
-            long id = resultOfQuery.getLong(0);
-            String date = resultOfQuery.getString(1);
-            String lasted = resultOfQuery.getString(2);
-            Integer lastedsec = resultOfQuery.getInt(3);
-            result += date + " " + lasted + " " + lastedsec + System.getProperty("line.separator");
-
             resultOfQuery.moveToNext();
         }
         resultOfQuery.close();

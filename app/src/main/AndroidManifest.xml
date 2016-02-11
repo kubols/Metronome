@@ -19,6 +19,7 @@
             </intent-filter>
         </activity>
         <activity android:label="history" android:name="BeepHistory"/>
+        <activity android:label="history" android:name="BeepDayHistory"/>
         <service
             android:name="pl.edu.uksw.metronome.BeepService"
             android:enabled="true" />
