@@ -6,10 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -49,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
     private SQLiteDatabase db;
     private DBOpenHelper dbhelp;
 
-
     DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm");
     String datestart = "";
     String lastedtime = "";
@@ -58,6 +60,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // set up toolbar
+        Toolbar myToolbar = (Toolbar)findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
 
         // open DB
         dbhelp = new DBOpenHelper(this);
@@ -275,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
                 buttonHandler.postDelayed(new ButtonsLongPressHandler(), DELAY);
             }
         }
-    };
+    }
 
     /*
      * class to interact with service
