@@ -20,31 +20,29 @@
             android:id="@+id/decrementButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="30dp"
+            android:textSize="40dp"
             android:text="-"
-            android:layout_weight="1"/>
+            android:textColor="@color/textPrimary"
+            android:layout_weight="1"
+            style="?android:attr/borderlessButtonStyle"/>
         <TextView
             android:id="@+id/bpmTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="30dp"
+            android:textSize="40dp"
             android:text="0"
+            android:textColor="@color/textPrimary"
             android:gravity="center"
             android:layout_weight="1"/>
         <Button
             android:id="@+id/incrementButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="30dp"
+            android:textSize="40dp"
             android:text="+"
-            android:layout_weight="1"/>
+            android:textColor="@color/textPrimary"
+            android:layout_weight="1"
+            style="?android:attr/borderlessButtonStyle"/>
     </LinearLayout>
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="25dp"
-        android:text="History"
-        android:onClick="checkHistory"/>
 
 </RelativeLayout>
