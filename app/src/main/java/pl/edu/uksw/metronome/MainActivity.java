@@ -249,6 +249,20 @@ public class MainActivity extends AppCompatActivity {
         startActivity(myIntent);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putLong("start", start);
+        outState.putString("dateStart", datestart);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        start = savedInstanceState.getLong("start");
+        datestart = savedInstanceState.getString("dateStart");
+    }
+
     private class ButtonsLongPressHandler implements Runnable {
         @Override
         public void run() {
