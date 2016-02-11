@@ -15,6 +15,7 @@ import android.widget.TextView;
  */
 public class BeepHistory extends AppCompatActivity implements View.OnClickListener {
 
+    private static String H_LOG = "MetronomeApp_History";
     private SQLiteDatabase db;
     private DBOpenHelper dbhelp;
     String tmpdate = "temp10lengt";
@@ -92,11 +93,11 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
             long id = resultOfQuery.getLong(0);
             String date = resultOfQuery.getString(1);
             Integer lastedsec = resultOfQuery.getInt(3);
-            Log.i("coss","d: "+date +" t: " + tmpdate);
+            Log.i(H_LOG,"d: "+date +" t: " + tmpdate);
             if (date.startsWith(tmpdate.substring(0,10)))
             {
                 sumtime[i] += (lastedsec/1000)*1000; // ignore miliseconds
-                Log.i("cos","rowne");
+                Log.i(H_LOG,"rowne");
             }
             else
             {
@@ -105,7 +106,7 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
                 sumtime[i] = 0;
                 sumtime[i] += (lastedsec/1000)*1000; // ignore miliseconds
                 tmpdate = date;
-                Log.i("cos","nierowne");
+                Log.i(H_LOG,"nierowne");
             }
             resultOfQuery.moveToNext();
         }
