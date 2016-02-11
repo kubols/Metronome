@@ -18,8 +18,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:label="history" android:name="BeepHistory"/>
-        <activity android:label="history" android:name="BeepDayHistory"/>
+        <activity android:label="History"
+            android:name="BeepHistory"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".MainActivity"/>
+        <activity android:label="Day"
+            android:name="BeepDayHistory"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".BeepHistory"/>
         <service
             android:name="pl.edu.uksw.metronome.BeepService"
             android:enabled="true" />

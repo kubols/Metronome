@@ -3,7 +3,9 @@ package pl.edu.uksw.metronome;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
 /**
@@ -14,10 +16,19 @@ public class BeepDayHistory extends AppCompatActivity {
     private SQLiteDatabase db;
     private DBOpenHelper dbhelp;
 
+    private ActionBar actionBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dayhistory);
+
+        // set up toolbar
+        Toolbar myToolbar = (Toolbar)findViewById(R.id.day_history_toolbar);
+        setSupportActionBar(myToolbar);
+        actionBar = getSupportActionBar();
+        // enable back button
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
         String date = "";
 
@@ -43,7 +54,7 @@ public class BeepDayHistory extends AppCompatActivity {
 
             TextView daylist = (TextView) findViewById(R.id.daylist);
             String history = viewAllEntries(date);
-              if (history == "")
+              if (history.equals(""))
                  history = "No entries";
 
             daylist.setText(history);
