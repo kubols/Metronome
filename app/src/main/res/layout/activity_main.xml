@@ -1,50 +1,62 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="pl.edu.uksw.metronome.MainActivity"
-    android:clickable="true"
-    android:onClick="start_stop">
+    tools:context="pl.edu.uksw.metronome.MainActivity">
 
-    <LinearLayout
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/my_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:gravity="center">
-        <Button
-            android:id="@+id/decrementButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="30dp"
-            android:text="-"
-            android:layout_weight="1"/>
-        <TextView
-            android:id="@+id/bpmTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="30dp"
-            android:text="0"
-            android:gravity="center"
-            android:layout_weight="1"/>
-        <Button
-            android:id="@+id/incrementButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="30dp"
-            android:text="+"
-            android:layout_weight="1"/>
-    </LinearLayout>
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:elevation="4dp"
+        app:theme="@style/CustomToolbar"/>
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="25dp"
-        android:text="History"
-        android:onClick="checkHistory"/>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:clickable="true"
+        android:onClick="start_stop">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center">
+            <Button
+                android:id="@+id/decrementButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="40dp"
+                android:text="-"
+                android:textColor="@color/textPrimary"
+                android:layout_weight="1"
+                style="?android:attr/borderlessButtonStyle"/>
+            <TextView
+                android:id="@+id/bpmTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="40dp"
+                android:text="0"
+                android:textColor="@color/textPrimary"
+                android:gravity="center"
+                android:layout_weight="1"/>
+            <Button
+                android:id="@+id/incrementButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="40dp"
+                android:text="+"
+                android:textColor="@color/textPrimary"
+                android:layout_weight="1"
+                style="?android:attr/borderlessButtonStyle"/>
+        </LinearLayout>
+
+    </RelativeLayout>
 </RelativeLayout>

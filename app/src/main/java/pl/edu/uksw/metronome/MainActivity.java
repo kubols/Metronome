@@ -6,11 +6,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -47,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
     private SQLiteDatabase db;
     private DBOpenHelper dbhelp;
 
-
     DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm");
     String datestart = "";
     String lastedtime = "";
@@ -56,6 +60,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // set up toolbar
+        Toolbar myToolbar = (Toolbar)findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
 
         // open DB
         dbhelp = new DBOpenHelper(this);
@@ -125,6 +133,22 @@ public class MainActivity extends AppCompatActivity {
                 decrement();
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.history:
+                checkHistory();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -226,10 +250,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void checkHistory(View view)
-    {
+    public void checkHistory() {
         Intent myIntent = new Intent(this, BeepHistory.class);
         startActivity(myIntent);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putLong("start", start);
+        outState.putString("dateStart", datestart);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        start = savedInstanceState.getLong("start");
+        datestart = savedInstanceState.getString("dateStart");
     }
 
     private class ButtonsLongPressHandler implements Runnable {
@@ -244,7 +281,7 @@ public class MainActivity extends AppCompatActivity {
                 buttonHandler.postDelayed(new ButtonsLongPressHandler(), DELAY);
             }
         }
-    };
+    }
 
     /*
      * class to interact with service
