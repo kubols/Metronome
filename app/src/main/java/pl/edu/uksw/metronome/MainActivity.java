@@ -20,6 +20,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private static String WORKING_NAME = "working";
     private boolean work = false;
     TextView bpmTextView;
+    TextView tempoTextView;
 
     private Handler buttonHandler = new Handler();                  //handler to continuous increase or decrease bpm
     private static int DELAY = 70;                                  //delay time between runnable repeat
@@ -71,6 +73,9 @@ public class MainActivity extends AppCompatActivity {
 
         bpmTextView = (TextView)findViewById(R.id.bpmTextView);
         bpmTextView.setText("" + (bpm));
+
+        tempoTextView = (TextView)findViewById(R.id.tempo);
+        tempoTextView.setText(assignTempo(bpm));
 
         /*
          * increment button listeners
@@ -186,6 +191,7 @@ public class MainActivity extends AppCompatActivity {
         if(bpm >= 30 && bpm < 200) {
             bpm++;
             bpmTextView.setText("" + (bpm));
+            tempoTextView.setText(assignTempo(bpm));
             beepService.setBpm(bpm);
         }
     }
@@ -197,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
         if(bpm > 30 && bpm <= 200) {
             bpm--;
             bpmTextView.setText("" + (bpm));
+            tempoTextView.setText(assignTempo(bpm));
             beepService.setBpm(bpm);
         }
     }
@@ -236,6 +243,25 @@ public class MainActivity extends AppCompatActivity {
                 beepService.playBeep(work, bpm);
             }
         }
+    }
+
+    public void openSmallMenu(View view){
+        Toast.makeText(this, "Menu", Toast.LENGTH_SHORT).show();
+    }
+
+    private String assignTempo(int bpm){
+        if(bpm >= 30 && bpm < 40) return "Grave";
+        else if(bpm >= 40 && bpm < 50) return "Largo";
+        else if(bpm >= 50 && bpm < 60) return "Lento";
+        else if(bpm >= 60 && bpm < 66) return "Larghetto";
+        else if(bpm >= 66 && bpm < 76) return "Adagio";
+        else if(bpm >= 76 && bpm < 108) return "Andante";
+        else if(bpm >= 108 && bpm < 120) return "Moderato";
+        else if(bpm >= 120 && bpm < 168) return "Allegro";
+        else if(bpm >= 168 && bpm < 176) return "Vivace";
+        else if(bpm >= 176 && bpm <= 200) return "Presto";
+        else return "null";
+
     }
 
     public void insertEntry() {
@@ -294,6 +320,7 @@ public class MainActivity extends AppCompatActivity {
             serviceConnected = true;
             bpm = beepService.getBpm();                                                             //get bpm from service on connection with service
             bpmTextView.setText("" + (bpm));                                                        //set textView
+            tempoTextView.setText(assignTempo(bpm));
             work = beepService.getRunning();                                                        //get boolean work from service
         }
 
