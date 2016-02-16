@@ -1,15 +1,19 @@
 package pl.edu.uksw.metronome;
 
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -249,6 +253,31 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Menu", Toast.LENGTH_SHORT).show();
     }
 
+    public void setBpmManually(View view){
+        /*AlertDialog.Builder builder = new AlertDialog.Builder(getApplication());
+        builder.setTitle("Set tempo").setMessage("Press");
+        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                bpm = 100;
+                bpmTextView.setText("" + (bpm));
+                tempoTextView.setText(assignTempo(bpm));
+                beepService.setBpm(bpm);
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();*/
+
+        DialogFragment dialog = new PickBpmDialogFragment();
+        dialog.show(getSupportFragmentManager(), "Dialog");
+    }
+
     private String assignTempo(int bpm){
         if(bpm >= 30 && bpm < 40) return "Grave";
         else if(bpm >= 40 && bpm < 50) return "Largo";
@@ -331,4 +360,28 @@ public class MainActivity extends AppCompatActivity {
             serviceConnected = false;
         }
     };
+
+    public class PickBpmDialogFragment extends DialogFragment{
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle("Pick up tempo")
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            bpm = 100;
+                            bpmTextView.setText("" + (bpm));
+                            tempoTextView.setText(assignTempo(bpm));
+                            beepService.setBpm(bpm);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                        }
+                    });
+            // Create the AlertDialog object and return it
+            return builder.create();
+        }
+    }
 }
