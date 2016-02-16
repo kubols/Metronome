@@ -86,6 +86,7 @@
             android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
+            android:elevation="4dp"
             android:background="@drawable/button_menu">
             <ImageView
                 android:layout_width="28dp"
