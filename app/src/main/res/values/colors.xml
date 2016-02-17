@@ -4,6 +4,14 @@
     <color name="colorPrimaryDark">#455a64</color>
     <color name="colorAccent">#ff9800</color>
 
+    <color name="colorButton">#5d7885</color>
+    <color name="colorButtonV21">#546E7A</color>
+
+    <color name="colorFabSelected">#455A64</color>
+    <color name="colorFabSelectedV21">#263238</color>
+    <color name="colorSmallFabSelected">#EF6C00</color>
+    <color name="colorSmallFabSelectedV21">#E65100</color>
+
     <color name="textPrimary">#87000000</color>
     <color name="textSecondary">#54000000</color>
     <color name="disabled">#38000000</color>
