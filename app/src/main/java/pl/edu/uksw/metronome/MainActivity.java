@@ -8,11 +8,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,7 +20,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +31,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static String LOG = "MetronomeApp";
     private static String BPM_NAME = "bpm";
@@ -45,6 +46,10 @@ public class MainActivity extends AppCompatActivity {
     private boolean decrementing = false;
     Button incrementButton;
     Button decrementButton;
+
+    private Animation fab_open, fab_close, rotate_forward, rotate_backward;
+    RelativeLayout fabMore, fab1, fab2;
+    private boolean isFabOpened;
 
     int bpm = 0;
 
@@ -70,6 +75,21 @@ public class MainActivity extends AppCompatActivity {
         // set up toolbar
         Toolbar myToolbar = (Toolbar)findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+
+        //floating action button animations
+        fabMore = (RelativeLayout)findViewById(R.id.fab_more);
+        fab1 = (RelativeLayout)findViewById(R.id.fab1);
+        fab2 = (RelativeLayout)findViewById(R.id.fab2);
+
+        fabMore.setOnClickListener(this);
+        fab1.setOnClickListener(this);
+        fab2.setOnClickListener(this);
+
+        rotate_forward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_forward);
+        rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_backward);
+        fab_open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
+        fab_close = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
+        isFabOpened = false;
 
         // open DB
         dbhelp = new DBOpenHelper(this);
@@ -249,8 +269,37 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void openSmallMenu(View view){
-        Toast.makeText(this, "Menu", Toast.LENGTH_SHORT).show();
+    public void onClick(View v){
+        int id = v.getId();
+        switch (id) {
+            case R.id.fab_more:
+                animateFabs();
+                break;
+            case R.id.fab1:
+                Toast.makeText(this, "FAB 1", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.fab2:
+                Toast.makeText(this, "FAB 2", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void animateFabs(){
+        if(isFabOpened) {
+            fabMore.startAnimation(rotate_backward);
+            fab1.startAnimation(fab_close);
+            fab2.startAnimation(fab_close);
+            fab1.setClickable(false);
+            fab2.setClickable(false);
+            isFabOpened = false;
+        }
+        else {
+            fabMore.startAnimation(rotate_forward);
+            fab1.startAnimation(fab_open);
+            fab2.startAnimation(fab_open);
+            fab1.setClickable(true);
+            fab2.setClickable(true);
+            isFabOpened = true;
+        }
     }
 
     public void setBpmManually(View view){
