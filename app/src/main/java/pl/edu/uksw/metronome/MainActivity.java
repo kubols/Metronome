@@ -265,7 +265,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 insertEntry();
                 lastedtime = "";
                 work = false;
-                beepService.playBeep(work, bpm);
+                beepService.setWork(work);
+                //beepService.playBeep(work, bpm);
             }
         }
     }
@@ -400,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             bpm = beepService.getBpm();                                                             //get bpm from service on connection with service
             bpmTextView.setText("" + (bpm));                                                        //set textView
             tempoTextView.setText(assignTempo(bpm));
-            work = beepService.getRunning();                                                        //get boolean work from service
+            work = beepService.getWork();                                                           //get boolean work from service
         }
 
         @Override
