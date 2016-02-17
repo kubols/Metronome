@@ -38,12 +38,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center">
-                <Button
+                <ImageButton
                     android:id="@+id/decrementButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="70dp"
                     android:text="-"
+                    android:src="@drawable/ic_minus"
                     android:textColor="@color/primary_text_material_light"
                     android:layout_weight="1"
                     style="?android:attr/borderlessButtonStyle"/>
@@ -58,12 +59,11 @@
                     android:gravity="center"
                     android:layout_weight="1"
                     android:onClick="setBpmManually"/>
-                <Button
+                <ImageButton
                     android:id="@+id/incrementButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="70dp"
-                    android:text="+"
+                    android:src="@drawable/ic_new"
                     android:textColor="@color/primary_text_material_light"
                     android:layout_weight="1"
                     style="?android:attr/borderlessButtonStyle"/>
@@ -94,7 +94,7 @@
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:layout_centerInParent="true"
-                android:src="@drawable/menu"/>
+                android:src="@drawable/ic_new"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -111,7 +111,7 @@
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:layout_centerInParent="true"
-                android:src="@drawable/menu"/>
+                android:src="@drawable/ic_new"/>
         </RelativeLayout>
 
         <RelativeLayout
@@ -127,7 +127,7 @@
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:layout_centerInParent="true"
-                android:src="@drawable/menu"/>
+                android:src="@drawable/ic_new"/>
         </RelativeLayout>
 
 

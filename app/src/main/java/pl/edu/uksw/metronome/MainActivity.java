@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,8 +45,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static int DELAY = 70;                                  //delay time between runnable repeat
     private boolean incrementing = false;
     private boolean decrementing = false;
-    Button incrementButton;
-    Button decrementButton;
+    ImageButton incrementButton;
+    ImageButton decrementButton;
 
     private Animation fab_open, fab_close, rotate_forward, rotate_backward;
     RelativeLayout fabMore, fab1, fab2;
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         /*
          * increment button listeners
          */
-        incrementButton = (Button)findViewById(R.id.incrementButton);
+        incrementButton = (ImageButton)findViewById(R.id.incrementButton);
         // long press
         incrementButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -135,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         /*
          * decrement button listeners
          */
-        decrementButton = (Button)findViewById(R.id.decrementButton);
+        decrementButton = (ImageButton)findViewById(R.id.decrementButton);
         // long press
         decrementButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -273,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int id = v.getId();
         switch (id) {
             case R.id.fab_more:
-                animateFabs();
+                animateFAB();
                 break;
             case R.id.fab1:
                 Toast.makeText(this, "FAB 1", Toast.LENGTH_SHORT).show();
@@ -283,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    private void animateFabs(){
+    private void animateFAB(){
         if(isFabOpened) {
             fabMore.startAnimation(rotate_backward);
             fab1.startAnimation(fab_close);
