@@ -69,12 +69,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center">
-                <Button
+                <ImageButton
                     android:id="@+id/decrementButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="70dp"
                     android:text="-"
+                    android:src="@drawable/ic_minus"
                     android:textColor="@color/primary_text_material_light"
                     android:layout_weight="1"
                     style="?android:attr/borderlessButtonStyle"/>
@@ -89,12 +90,11 @@
                     android:gravity="center"
                     android:layout_weight="1"
                     android:onClick="setBpmManually"/>
-                <Button
+                <ImageButton
                     android:id="@+id/incrementButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="70dp"
-                    android:text="+"
+                    android:src="@drawable/ic_new"
                     android:textColor="@color/primary_text_material_light"
                     android:layout_weight="1"
                     style="?android:attr/borderlessButtonStyle"/>
@@ -112,18 +112,53 @@
         </RelativeLayout>
 
         <RelativeLayout
+            android:id="@+id/fab2"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="135dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:elevation="6dp"
+            android:background="@drawable/small_fab"
+            android:visibility="invisible">
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/ic_new"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/fab1"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="80dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:elevation="6dp"
+            android:background="@drawable/small_fab"
+            android:visibility="invisible">
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/ic_new"/>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/fab_more"
             android:layout_width="56dp"
             android:layout_height="56dp"
             android:layout_marginBottom="@dimen/activity_vertical_margin"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:background="@drawable/button_menu">
+            android:elevation="6dp"
+            android:background="@drawable/main_fab">
             <ImageView
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:layout_centerInParent="true"
-                android:src="@drawable/menu"
-                android:onClick="openSmallMenu"/>
+                android:src="@drawable/ic_new"/>
         </RelativeLayout>
 
 

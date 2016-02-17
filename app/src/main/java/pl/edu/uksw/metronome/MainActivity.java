@@ -8,11 +8,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,8 +20,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+<<<<<<< HEAD
 import android.widget.ImageView;
+=======
+import android.widget.ImageButton;
+import android.widget.RelativeLayout;
+>>>>>>> f4401dddbefe847d7f1140f51b79cf6ce5825191
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +40,7 @@ import java.util.TimerTask;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static String LOG = "MetronomeApp";
     private static String BPM_NAME = "bpm";
@@ -53,8 +58,12 @@ public class MainActivity extends AppCompatActivity {
     private static int DELAY = 70;                                  //delay time between runnable repeat
     private boolean incrementing = false;
     private boolean decrementing = false;
-    Button incrementButton;
-    Button decrementButton;
+    ImageButton incrementButton;
+    ImageButton decrementButton;
+
+    private Animation fab_open, fab_close, rotate_forward, rotate_backward;
+    RelativeLayout fabMore, fab1, fab2;
+    private boolean isFabOpened;
 
     ImageView dot1;
 
@@ -84,7 +93,24 @@ public class MainActivity extends AppCompatActivity {
         Toolbar myToolbar = (Toolbar)findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
+<<<<<<< HEAD
         dot1 = (ImageView)findViewById(R.id.dot1);
+=======
+        //floating action button animations
+        fabMore = (RelativeLayout)findViewById(R.id.fab_more);
+        fab1 = (RelativeLayout)findViewById(R.id.fab1);
+        fab2 = (RelativeLayout)findViewById(R.id.fab2);
+
+        fabMore.setOnClickListener(this);
+        fab1.setOnClickListener(this);
+        fab2.setOnClickListener(this);
+
+        rotate_forward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_forward);
+        rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_backward);
+        fab_open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
+        fab_close = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
+        isFabOpened = false;
+>>>>>>> f4401dddbefe847d7f1140f51b79cf6ce5825191
 
         // open DB
         dbhelp = new DBOpenHelper(this);
@@ -99,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         /*
          * increment button listeners
          */
-        incrementButton = (Button)findViewById(R.id.incrementButton);
+        incrementButton = (ImageButton)findViewById(R.id.incrementButton);
         // long press
         incrementButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -130,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
         /*
          * decrement button listeners
          */
-        decrementButton = (Button)findViewById(R.id.decrementButton);
+        decrementButton = (ImageButton)findViewById(R.id.decrementButton);
         // long press
         decrementButton.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
@@ -297,8 +323,37 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void openSmallMenu(View view){
-        Toast.makeText(this, "Menu", Toast.LENGTH_SHORT).show();
+    public void onClick(View v){
+        int id = v.getId();
+        switch (id) {
+            case R.id.fab_more:
+                animateFAB();
+                break;
+            case R.id.fab1:
+                Toast.makeText(this, "FAB 1", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.fab2:
+                Toast.makeText(this, "FAB 2", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void animateFAB(){
+        if(isFabOpened) {
+            fabMore.startAnimation(rotate_backward);
+            fab1.startAnimation(fab_close);
+            fab2.startAnimation(fab_close);
+            fab1.setClickable(false);
+            fab2.setClickable(false);
+            isFabOpened = false;
+        }
+        else {
+            fabMore.startAnimation(rotate_forward);
+            fab1.startAnimation(fab_open);
+            fab2.startAnimation(fab_open);
+            fab1.setClickable(true);
+            fab2.setClickable(true);
+            isFabOpened = true;
+        }
     }
 
     public void setBpmManually(View view){
