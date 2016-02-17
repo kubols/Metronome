@@ -8,8 +8,15 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
 
 /**
@@ -23,11 +30,18 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
     String tmpdate = "temp10lengt";
     Integer sumtime[] = new Integer[999];
     private ActionBar actionBar;
+    private ViewGroup mContainerView;
+    ViewGroup todelete = null;
+
+    public AlphaAnimation fadeIn = new AlphaAnimation(0.0f , 1.0f ) ;
+    public AlphaAnimation fadeOut = new AlphaAnimation( 1.0f , 0.0f ) ;
+    Integer todel = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_beephistory);
+        mContainerView = (ViewGroup) findViewById(R.id.history);
 
         // set up toolbar
         Toolbar myToolbar = (Toolbar)findViewById(R.id.history_toolbar);
@@ -37,6 +51,11 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         LinearLayout linearLayout = (LinearLayout)findViewById(R.id.history);
+
+
+
+
+
 
         // OPEN DB
         dbhelp = new DBOpenHelper(this);
@@ -85,13 +104,46 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
     }
 
     public void onClick(View v) {
+        LinearLayout linearLayout = (LinearLayout)findViewById(R.id.history);
         TextView tmp = (TextView)v;
         String tmpdate = tmp.getText().toString();
         tmpdate = tmpdate.substring(0, 10);
 
+        String history = viewAllEntries(tmpdate);
+        if (history.equals(""))
+            history = "No entries";
+
+       // tmp.append("costam costam witam panstwa");
+        if(todelete != null)
+        {
+            mContainerView.removeView(todelete);
+        }
+
+        final ViewGroup newView = (ViewGroup) LayoutInflater.from(this).inflate(
+                R.layout.list_item_example, mContainerView, false);
+
+        // Set the text in the new row to a random country.
+        ((TextView) newView.findViewById(android.R.id.text1)).setText(history);
+        Log.i("cos", Integer.toString(tmp.getId()));
+        mContainerView.addView(newView, tmp.getId() + 1);
+        todelete = newView;
+     //   newView.findViewById(R.id.delete_button).setOnClickListener(new View.OnClickListener() {
+
+
+        //TranslateAnimation animate = new TranslateAnimation(0,0,0,tmp.getHeight());
+        //animate.setDuration(2000);
+        //animate.setFillAfter(true);
+        //tmp.startAnimation(animate);
+      //  tmp.setVisibility(View.GONE);
+       // Animation slide = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.slide_down);
+       // tmp.startAnimation(anim);
+       // tmp.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_top));
+
+        /*
         Intent myIntent = new Intent(this, BeepDayHistory.class);
         myIntent.putExtra("date", tmpdate);
         startActivity(myIntent);
+        */
     }
 
     public String[] viewSumEntries() {
@@ -121,6 +173,22 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
             resultOfQuery.moveToNext();
         }
         resultOfQuery.close();
+        return result;
+    }
+
+    public String viewAllEntries(String tmpdate) {
+        db = dbhelp.getWritableDatabase();
+        Cursor resultOfQuery = db.rawQuery("SELECT date, lasted FROM history WHERE date LIKE '"+tmpdate+"%'", null);
+        resultOfQuery.moveToFirst();
+        String result = "";
+        while(!resultOfQuery.isAfterLast()) {
+            String date = resultOfQuery.getString(0);
+            String lasted = resultOfQuery.getString(1);
+            result += date + " " + lasted  + System.getProperty("line.separator");
+            resultOfQuery.moveToNext();
+        }
+        resultOfQuery.close();
+        dbhelp.close();
         return result;
     }
 }
