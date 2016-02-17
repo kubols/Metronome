@@ -23,12 +23,17 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,12 +44,19 @@ public class MainActivity extends AppCompatActivity {
     TextView bpmTextView;
     TextView tempoTextView;
 
+
+    private int mInterval = 5000; // 5 seconds by default, can be changed later
+    private Handler mHandler;
+
+
     private Handler buttonHandler = new Handler();                  //handler to continuous increase or decrease bpm
     private static int DELAY = 70;                                  //delay time between runnable repeat
     private boolean incrementing = false;
     private boolean decrementing = false;
     Button incrementButton;
     Button decrementButton;
+
+    ImageView dot1;
 
     int bpm = 0;
 
@@ -61,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
     DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm");
     String datestart = "";
     String lastedtime = "";
+    Integer dotCounter = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
         // set up toolbar
         Toolbar myToolbar = (Toolbar)findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+
+        dot1 = (ImageView)findViewById(R.id.dot1);
 
         // open DB
         dbhelp = new DBOpenHelper(this);
@@ -165,6 +180,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
         bindService(new Intent(this, BeepService.class), connection, Context.BIND_AUTO_CREATE);
         startService(new Intent(this, BeepService.class));
+
         Log.d(LOG, "onStart");
     }
 
@@ -212,6 +228,18 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    public void setDot()
+    {
+        dot1.setImageResource(R.drawable.dot);
+    }
+    public void setDot2()
+    {
+        dot1.setImageResource(R.drawable.dot2);
+    }
+
+
+
     /*
      * Start/Stop bpm button
      */
@@ -219,13 +247,33 @@ public class MainActivity extends AppCompatActivity {
         if(beepService != null){
             // if metronome is not ticking, start
             if(!work) {
+                work = true;
                 start = System.currentTimeMillis();
                 datestart = df.format(Calendar.getInstance().getTime());
 
-                work = true;
+
                 beepService.playBeep(work, bpm);
+                dot1.setImageResource(R.drawable.dot2);
+                ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
+                executor.scheduleWithFixedDelay(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(dotCounter == 0) {
+                            setDot();
+                            dotCounter = 1;
+                            Log.i("tim","dot");
+                        }
+                        else {
+                            setDot2();
+                            dotCounter = 0;
+                            Log.i("tim","dot1");
+                        }
+                    }
+                }, 0L, 1, TimeUnit.SECONDS);
+
             }
             else {
+                dot1.setImageResource(R.drawable.dot);
                 stop = System.currentTimeMillis();
                 time = stop - start;
                 long sec = time/1000;

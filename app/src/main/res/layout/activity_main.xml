@@ -15,6 +15,35 @@
         android:elevation="4dp"
         app:theme="@style/CustomToolbar"/>
 
+    <ImageView
+        android:id="@+id/dot1"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/dot"/>
+
+    <ImageView
+        android:id="@+id/dot2"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/dot" />
+
+    <ImageView
+        android:id="@+id/dot3"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/dot" />
+
+    <ImageView
+        android:id="@+id/dot4"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_centerInParent="true"
+        android:src="@drawable/dot"
+        android:onClick="openSmallMenu"/>
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -23,6 +52,8 @@
         android:paddingTop="@dimen/activity_vertical_margin"
         android:clickable="true"
         android:onClick="start_stop">
+
+
 
         <RelativeLayout
             android:layout_width="wrap_content"
