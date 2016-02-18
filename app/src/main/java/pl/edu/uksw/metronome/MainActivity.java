@@ -1,16 +1,21 @@
 package pl.edu.uksw.metronome;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -23,24 +28,22 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-<<<<<<< HEAD
 import android.widget.ImageView;
-=======
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
->>>>>>> f4401dddbefe847d7f1140f51b79cf6ce5825191
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+
+
+
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+
 
     private static String LOG = "MetronomeApp";
     private static String BPM_NAME = "bpm";
@@ -65,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     RelativeLayout fabMore, fab1, fab2;
     private boolean isFabOpened;
 
-    ImageView dot1;
+    ImageView dot1, dot2, dot3, dot4;
 
     int bpm = 0;
 
@@ -76,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     long stop;
     long time;
 
+
     private SQLiteDatabase db;
     private DBOpenHelper dbhelp;
 
@@ -83,19 +87,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     String datestart = "";
     String lastedtime = "";
     Integer dotCounter = 0;
+    Integer result = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        registerReceiver(broadcast, filter);
+
         // set up toolbar
         Toolbar myToolbar = (Toolbar)findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-<<<<<<< HEAD
         dot1 = (ImageView)findViewById(R.id.dot1);
-=======
+        dot2 = (ImageView)findViewById(R.id.dot2);
+        dot3 = (ImageView)findViewById(R.id.dot3);
+        dot4 = (ImageView)findViewById(R.id.dot4);
+
+
+
         //floating action button animations
         fabMore = (RelativeLayout)findViewById(R.id.fab_more);
         fab1 = (RelativeLayout)findViewById(R.id.fab1);
@@ -110,7 +121,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fab_open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
         fab_close = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_close);
         isFabOpened = false;
->>>>>>> f4401dddbefe847d7f1140f51b79cf6ce5825191
 
         // open DB
         dbhelp = new DBOpenHelper(this);
@@ -185,6 +195,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+
+    private IntentFilter filter = new IntentFilter("pl.edu.uksw.metronome.Broadcast");
+
+    public BroadcastReceiver broadcast = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            result = intent.getIntExtra("result",result);
+            Log.i("cos", Integer.toString(result));
+            setDot(result);
+        }
+    };
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -255,13 +277,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    public void setDot()
+    public void setDot(Integer num)
     {
-        dot1.setImageResource(R.drawable.dot);
-    }
-    public void setDot2()
-    {
-        dot1.setImageResource(R.drawable.dot2);
+        if(num == 0) {
+            dot4.setImageResource(R.drawable.dot);
+            dot1.setImageResource(R.drawable.dot2);
+        }
+        else if(num == 1) {
+            dot1.setImageResource(R.drawable.dot);
+            dot2.setImageResource(R.drawable.dot2);
+        }
+        else if(num == 2) {
+            dot2.setImageResource(R.drawable.dot);
+            dot3.setImageResource(R.drawable.dot2);
+        }
+        else if(num == 3) {
+            dot3.setImageResource(R.drawable.dot);
+            dot4.setImageResource(R.drawable.dot2);
+        }
     }
 
 
@@ -276,30 +309,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 work = true;
                 start = System.currentTimeMillis();
                 datestart = df.format(Calendar.getInstance().getTime());
-
-
                 beepService.playBeep(work, bpm);
-                dot1.setImageResource(R.drawable.dot2);
-                ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-                executor.scheduleWithFixedDelay(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(dotCounter == 0) {
-                            setDot();
-                            dotCounter = 1;
-                            Log.i("tim","dot");
-                        }
-                        else {
-                            setDot2();
-                            dotCounter = 0;
-                            Log.i("tim","dot1");
-                        }
-                    }
-                }, 0L, 1, TimeUnit.SECONDS);
-
             }
             else {
-                dot1.setImageResource(R.drawable.dot);
                 stop = System.currentTimeMillis();
                 time = stop - start;
                 long sec = time/1000;
@@ -487,4 +499,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return builder.create();
         }
     }
+
+
 }

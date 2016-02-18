@@ -36,6 +36,7 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
     public AlphaAnimation fadeIn = new AlphaAnimation(0.0f , 1.0f ) ;
     public AlphaAnimation fadeOut = new AlphaAnimation( 1.0f , 0.0f ) ;
     Integer todel = 0;
+    Integer tmpid = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,31 +120,21 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
             mContainerView.removeView(todelete);
         }
 
-        final ViewGroup newView = (ViewGroup) LayoutInflater.from(this).inflate(
-                R.layout.list_item_example, mContainerView, false);
+        if(tmp.getId() != tmpid) {
+            final ViewGroup newView = (ViewGroup) LayoutInflater.from(this).inflate(
+                    R.layout.list_item_example, mContainerView, false);
 
-        // Set the text in the new row to a random country.
-        ((TextView) newView.findViewById(android.R.id.text1)).setText(history);
-        Log.i("cos", Integer.toString(tmp.getId()));
-        mContainerView.addView(newView, tmp.getId() + 1);
-        todelete = newView;
-     //   newView.findViewById(R.id.delete_button).setOnClickListener(new View.OnClickListener() {
-
-
-        //TranslateAnimation animate = new TranslateAnimation(0,0,0,tmp.getHeight());
-        //animate.setDuration(2000);
-        //animate.setFillAfter(true);
-        //tmp.startAnimation(animate);
-      //  tmp.setVisibility(View.GONE);
-       // Animation slide = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.slide_down);
-       // tmp.startAnimation(anim);
-       // tmp.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.slide_in_top));
-
-        /*
-        Intent myIntent = new Intent(this, BeepDayHistory.class);
-        myIntent.putExtra("date", tmpdate);
-        startActivity(myIntent);
-        */
+            // Set the text in the new row to a random country.
+            ((TextView) newView.findViewById(android.R.id.text1)).setText(history);
+            Log.i("cos", Integer.toString(tmp.getId()));
+            mContainerView.addView(newView, tmp.getId() + 1);
+            todelete = newView;
+            tmpid = tmp.getId();
+        }
+        else
+        {
+            tmpid = -1;
+        }
     }
 
     public String[] viewSumEntries() {

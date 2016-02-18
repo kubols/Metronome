@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -14,7 +15,7 @@ public class BeepService extends Service {
     private static String LOG_S = "MetronomeService";
     private final AtomicBoolean running = new AtomicBoolean(false);
     private int bpm = 90;
-
+    public int dotNumber = 0;
     /*
      * this class will return the Service instance, MetronomeBinder object will be returned on binding with the MainActivity
      */
@@ -60,6 +61,12 @@ public class BeepService extends Service {
                         Log.d(LOG_S, "inside loop - " + running.get() + " - status");
                         try {
                             playMedia();
+                            Intent intent = new Intent();
+                            intent.putExtra("result", dotNumber);
+                            dotNumber = (dotNumber+1)%4;
+                            intent.setAction("pl.edu.uksw.metronome.Broadcast");
+                            sendBroadcast(intent);
+
                             Thread.sleep(60000/ getBpm());
                         } catch (InterruptedException e) {
                             e.printStackTrace();

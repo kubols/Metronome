@@ -29,6 +29,8 @@
         <service
             android:name="pl.edu.uksw.metronome.BeepService"
             android:enabled="true" />
+        <receiver android:name="broadcast" >
+        </receiver>
     </application>
 
 </manifest>
