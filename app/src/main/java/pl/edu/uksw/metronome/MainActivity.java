@@ -1,16 +1,21 @@
 package pl.edu.uksw.metronome;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -24,6 +29,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
@@ -34,7 +40,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+
+
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+
 
     private static String LOG = "MetronomeApp";
     private static String BPM_NAME = "bpm";
@@ -42,6 +53,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean work = false;
     TextView bpmTextView;
     TextView tempoTextView;
+
+
+    private int mInterval = 5000; // 5 seconds by default, can be changed later
+    private Handler mHandler;
+
 
     private Handler buttonHandler = new Handler();                  //handler to continuous increase or decrease bpm
     private static int DELAY = 70;                                  //delay time between runnable repeat
@@ -54,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     RelativeLayout fabMore, fab1, fab2;
     private boolean isFabOpened;
 
+    ImageView dot1, dot2, dot3, dot4;
+
     int bpm = 0;
 
     BeepService beepService = null;                                 //reference to service, initialized on connection to service
@@ -63,21 +81,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     long stop;
     long time;
 
+
     private SQLiteDatabase db;
     private DBOpenHelper dbhelp;
 
     DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm");
     String datestart = "";
     String lastedtime = "";
+    Integer dotCounter = 0;
+    Integer result = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        registerReceiver(broadcast, filter);
+
         // set up toolbar
         Toolbar myToolbar = (Toolbar)findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+
+        dot1 = (ImageView)findViewById(R.id.dot1);
+        dot2 = (ImageView)findViewById(R.id.dot2);
+        dot3 = (ImageView)findViewById(R.id.dot3);
+        dot4 = (ImageView)findViewById(R.id.dot4);
+
+
 
         //floating action button animations
         fabMore = (RelativeLayout)findViewById(R.id.fab_more);
@@ -167,6 +197,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+
+    private IntentFilter filter = new IntentFilter("pl.edu.uksw.metronome.Broadcast");
+
+    public BroadcastReceiver broadcast = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            result = intent.getIntExtra("result",result);
+            Log.i("cos", Integer.toString(result));
+            setDot(result);
+        }
+    };
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -188,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onStart();
         bindService(new Intent(this, BeepService.class), connection, Context.BIND_AUTO_CREATE);
         startService(new Intent(this, BeepService.class));
+
         Log.d(LOG, "onStart");
     }
 
@@ -235,6 +278,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
+    public void setDot(Integer num)
+    {
+        if(num == 0) {
+            dot4.setImageResource(R.drawable.dot);
+            dot1.setImageResource(R.drawable.dot2);
+        }
+        else if(num == 1) {
+            dot1.setImageResource(R.drawable.dot);
+            dot2.setImageResource(R.drawable.dot2);
+        }
+        else if(num == 2) {
+            dot2.setImageResource(R.drawable.dot);
+            dot3.setImageResource(R.drawable.dot2);
+        }
+        else if(num == 3) {
+            dot3.setImageResource(R.drawable.dot);
+            dot4.setImageResource(R.drawable.dot2);
+        }
+    }
+
+
+
     /*
      * Start/Stop bpm button
      */
@@ -242,10 +308,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(beepService != null){
             // if metronome is not ticking, start
             if(!work) {
+                work = true;
                 start = System.currentTimeMillis();
                 datestart = df.format(Calendar.getInstance().getTime());
-
-                work = true;
                 beepService.playBeep(work, bpm);
             }
             else {
@@ -457,4 +522,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return builder.create();
         }
     }
+
+
 }
