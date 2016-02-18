@@ -13,9 +13,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BeepService extends Service {
 
     private static String LOG_S = "MetronomeService";
-    private final AtomicBoolean running = new AtomicBoolean(false);
+    //private final AtomicBoolean running = new AtomicBoolean(false);
     private int bpm = 90;
     public int dotNumber = 0;
+    private boolean work = false;
+
     /*
      * this class will return the Service instance, MetronomeBinder object will be returned on binding with the MainActivity
      */
@@ -52,13 +54,13 @@ public class BeepService extends Service {
     public void playBeep(boolean work, int bpm){
         if(work){
             Log.d(LOG_S, "beep, beep, beep " + bpm);
-            running.set(true);
+            setWork(work);
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     Log.d(LOG_S, "running... " + this);
-                    while(running.get()){
-                        Log.d(LOG_S, "inside loop - " + running.get() + " - status");
+                    while(getWork()){
+                        Log.d(LOG_S, "inside loop - " + getWork() + " - status");
                         try {
                             playMedia();
                             Intent intent = new Intent();
@@ -77,7 +79,8 @@ public class BeepService extends Service {
         }
         else {
             Log.d(LOG_S, "stop");
-            running.set(false);
+            setWork(false);
+            //running.set(false);
         }
     }
 
@@ -103,9 +106,15 @@ public class BeepService extends Service {
         this.bpm = bpm;
     }
 
-    public boolean getRunning(){
-        if(running.get()) return true;
-        else return false;
+    public boolean getWork() { return work; }
+
+    public void setWork(boolean work){
+        this.work = work;
     }
+
+//    public boolean getRunning(){
+//        if(running.get()) return true;
+//        else return false;
+//    }
 
 }

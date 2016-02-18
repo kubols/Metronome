@@ -5,5 +5,19 @@
     <corners android:radius="28dp"/>
     <solid android:color="@color/colorPrimary"/>
 
-
 </shape>
+
+<!--to do: after one click, state of button is changed, and animations are started from wrong rotation state-->
+
+<!--<selector xmlns:android="http://schemas.android.com/apk/res/android">-->
+    <!--<item android:state_pressed="true">-->
+        <!--<shape android:shape="oval">-->
+            <!--<solid android:color="@color/colorFabSelected"/>-->
+        <!--</shape>-->
+    <!--</item>-->
+    <!--<item android:state_enabled="true">-->
+        <!--<shape android:shape="oval">-->
+            <!--<solid android:color="@color/colorPrimary"/>-->
+        <!--</shape>-->
+    <!--</item>-->
+<!--</selector>-->
