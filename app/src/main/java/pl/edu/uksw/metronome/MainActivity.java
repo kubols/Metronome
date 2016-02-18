@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -23,6 +24,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -265,7 +267,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 insertEntry();
                 lastedtime = "";
                 work = false;
-                beepService.playBeep(work, bpm);
+                beepService.setWork(work);
+                //beepService.playBeep(work, bpm);
             }
         }
     }
@@ -400,7 +403,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             bpm = beepService.getBpm();                                                             //get bpm from service on connection with service
             bpmTextView.setText("" + (bpm));                                                        //set textView
             tempoTextView.setText(assignTempo(bpm));
-            work = beepService.getRunning();                                                        //get boolean work from service
+            work = beepService.getWork();                                                           //get boolean work from service
         }
 
         @Override
@@ -412,14 +415,34 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     };
 
     public class PickBpmDialogFragment extends DialogFragment{
+        EditText bpmPicker;
+        int temp;
+
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
+
             // Use the Builder class for convenient dialog construction
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+            final View view = layoutInflater.inflate(R.layout.dialog_bpm_picker, null);
+
             builder.setTitle("Pick up tempo")
+                    .setView(view)
                     .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            bpm = 100;
+                            bpmPicker = (EditText)view.findViewById(R.id.dialog_bpm_picker_editText);
+                            temp = Integer.valueOf(bpmPicker.getText().toString());
+
+                            if (temp > 200) {
+                                bpm = 200;
+                                Toast.makeText(getApplicationContext(), "To high bpm", Toast.LENGTH_SHORT).show();
+                            }
+                            else if (temp < 30) {
+                                bpm = 30;
+                                Toast.makeText(getApplicationContext(), "To low bpm", Toast.LENGTH_SHORT).show();
+                            }
+                            else bpm = temp;
+
                             bpmTextView.setText("" + (bpm));
                             tempoTextView.setText(assignTempo(bpm));
                             beepService.setBpm(bpm);
