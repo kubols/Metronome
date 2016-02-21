@@ -254,15 +254,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
     }
 
+    private void updateBpmViewAndService(int beatsPerMinute){
+        bpmTextView.setText("" + (beatsPerMinute));
+        tempoTextView.setText(assignTempo(beatsPerMinute));
+        beepService.setBpm(beatsPerMinute);
+    }
+
+    private void updateBpmViewAndService(long beatsPerMinute){
+        bpmTextView.setText("" + (beatsPerMinute));
+        tempoTextView.setText(assignTempo((int)beatsPerMinute));
+        beepService.setBpm((int)beatsPerMinute);
+    }
+
     /*
      * Faster bpm button
      */
     public void increment(){
         if(bpm >= 30 && bpm < 200) {
             bpm++;
-            bpmTextView.setText("" + (bpm));
-            tempoTextView.setText(assignTempo(bpm));
-            beepService.setBpm(bpm);
+            updateBpmViewAndService(bpm);
         }
     }
 
@@ -272,12 +282,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void decrement(){
         if(bpm > 30 && bpm <= 200) {
             bpm--;
-            bpmTextView.setText("" + (bpm));
-            tempoTextView.setText(assignTempo(bpm));
-            beepService.setBpm(bpm);
+            updateBpmViewAndService(bpm);
         }
     }
-
 
     public void setDot(Integer num)
     {
@@ -298,8 +305,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             dot4.setImageResource(R.drawable.dot2);
         }
     }
-
-
 
     /*
      * Start/Stop bpm button
@@ -383,19 +388,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             tapBpm = 60000/(System.currentTimeMillis() - startBpm);
             startBpm = System.currentTimeMillis();
             if (tapBpm >= minBpm && tapBpm <= maxBpm) {
-                bpmTextView.setText("" + (tapBpm));
-                tempoTextView.setText(assignTempo((int) tapBpm));
-                beepService.setBpm((int) tapBpm);
+                updateBpmViewAndService(tapBpm);
             }
             else if (tapBpm > maxBpm){
-                bpmTextView.setText("" + (maxBpm));
-                tempoTextView.setText(assignTempo(maxBpm));
-                beepService.setBpm(maxBpm);
+                updateBpmViewAndService(maxBpm);
             }
             else if (tapBpm < minBpm){
-                bpmTextView.setText("" + (minBpm));
-                tempoTextView.setText(assignTempo(minBpm));
-                beepService.setBpm(minBpm);
+                updateBpmViewAndService(minBpm);
             }
         }
     }
@@ -536,10 +535,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                 Toast.makeText(getApplicationContext(), "To low bpm", Toast.LENGTH_SHORT).show();
                             }
                             else bpm = temp;
-
-                            bpmTextView.setText("" + (bpm));
-                            tempoTextView.setText(assignTempo(bpm));
-                            beepService.setBpm(bpm);
+                            updateBpmViewAndService(bpm);
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -551,6 +547,4 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return builder.create();
         }
     }
-
-
 }
