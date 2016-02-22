@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -17,6 +18,9 @@ public class BeepService extends Service {
     private int bpm = 90;
     public int dotNumber = 0;
     private boolean work = false;
+
+
+    Handler handler;
 
     /*
      * this class will return the Service instance, MetronomeBinder object will be returned on binding with the MainActivity
@@ -55,7 +59,7 @@ public class BeepService extends Service {
         if(work){
             Log.d(LOG_S, "beep, beep, beep " + bpm);
             setWork(work);
-            new Thread(new Runnable() {
+            /*new Thread(new Runnable() {
                 @Override
                 public void run() {
                     Log.d(LOG_S, "running... " + this);
@@ -75,7 +79,24 @@ public class BeepService extends Service {
                         }
                     }
                 }
-            }).start();
+            }).start();*/
+
+            handler = new Handler();
+            final Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    if(getWork()){
+                        handler.postDelayed(this, 60000 / getBpm());
+                        playMedia();
+                        Intent intent = new Intent();
+                        intent.putExtra("result", dotNumber);
+                        dotNumber = (dotNumber + 1) % 4;
+                        intent.setAction("pl.edu.uksw.metronome.Broadcast");
+                        sendBroadcast(intent);
+                    }
+                }
+            };
+            handler.post(r);
         }
         else {
             Log.d(LOG_S, "stop");
