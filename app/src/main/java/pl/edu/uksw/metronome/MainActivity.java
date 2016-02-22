@@ -384,17 +384,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(startBpm == 0) {
             startBpm = System.currentTimeMillis();
         }
+        else if ((System.currentTimeMillis() - startBpm)/1000 > 2){
+            startBpm = System.currentTimeMillis();
+        }
         else {
             tapBpm = 60000/(System.currentTimeMillis() - startBpm);
             startBpm = System.currentTimeMillis();
             if (tapBpm >= minBpm && tapBpm <= maxBpm) {
-                updateBpmViewAndService(tapBpm);
+                bpm = (int)tapBpm;
+                updateBpmViewAndService(bpm);
             }
             else if (tapBpm > maxBpm){
-                updateBpmViewAndService(maxBpm);
+                bpm = maxBpm;
+                updateBpmViewAndService(bpm);
             }
             else if (tapBpm < minBpm){
-                updateBpmViewAndService(minBpm);
+                bpm = minBpm;
+                updateBpmViewAndService(bpm);
             }
         }
     }
