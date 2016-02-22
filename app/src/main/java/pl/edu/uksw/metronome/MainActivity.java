@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
@@ -28,6 +29,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -66,7 +68,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     RelativeLayout fabMore, fab1, fab2;
     private boolean isFabOpened;
 
-    ImageView dot1, dot2, dot3, dot4;
+    LinearLayout dotsLayout;
+    ImageView dot1, dot2, dot3, dot4, dot00;
+    int dots = 3;
 
     private final static int maxBpm = 200;
     private final static int minBpm = 30;
@@ -107,7 +111,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dot3 = (ImageView)findViewById(R.id.dot3);
         dot4 = (ImageView)findViewById(R.id.dot4);
 
-
+        dotsLayout = (LinearLayout)findViewById(R.id.dotsLayout);
+        setupDots(dots);
 
         //floating action button animations
         fabMore = (RelativeLayout)findViewById(R.id.fab_more);
@@ -262,8 +267,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void updateBpmViewAndService(long beatsPerMinute){
         bpmTextView.setText("" + (beatsPerMinute));
-        tempoTextView.setText(assignTempo((int)beatsPerMinute));
-        beepService.setBpm((int)beatsPerMinute);
+        tempoTextView.setText(assignTempo((int) beatsPerMinute));
+        beepService.setBpm((int) beatsPerMinute);
     }
 
     /*
@@ -283,6 +288,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(bpm > 30 && bpm <= 200) {
             bpm--;
             updateBpmViewAndService(bpm);
+        }
+    }
+
+    /*
+     * TU MOZNA ZAMIENIC IMAGEVIEW NA BUTTONS, ZEBY LATWIEJ MODYFIKOWAC ICH STAN, ALE BUTTONS NIE ZACHOWUJA
+     * ODPOWIEDNIEGO KSZTALTU. W IMAGEVIEW XML SA STATYCZNE Z TEGO CO CZYTALEM I NIE DA RADY TEGO ZMIENIC
+     */
+    public void setupDots(int dots){
+        dotsLayout.removeAllViews();
+        dotsLayout.setWeightSum(dots);
+        for (int i = 0; i < dots; i++){
+            ImageView iv = new ImageView(this);
+            iv.setImageResource(R.drawable.dot_base);
+            iv.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1.0f
+            ));
+            iv.setId(i);
+            dotsLayout.addView(iv);
         }
     }
 
@@ -356,7 +381,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 tapBpm();
                 break;
             case R.id.fab2:
+                dots = 4;
+                setupDots(dots);
                 Toast.makeText(this, "FAB 2", Toast.LENGTH_SHORT).show();
+                break;
         }
     }
 
