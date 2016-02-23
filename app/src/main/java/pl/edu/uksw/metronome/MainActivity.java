@@ -11,7 +11,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
@@ -214,6 +213,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             result = intent.getIntExtra("result",result);
             Log.i("cos", Integer.toString(result));
             setDot(result);
+            higlightDot(result);
         }
     };
 
@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
     }
 
-    public int getDots(){ return dots; }
+    public int getDotsNumber(){ return dots; }
 
     private void updateBpmViewAndService(int beatsPerMinute){
         bpmTextView.setText("" + (beatsPerMinute));
@@ -296,10 +296,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    /*
-     * TU MOZNA ZAMIENIC IMAGEVIEW NA BUTTONS, ZEBY LATWIEJ MODYFIKOWAC ICH STAN, ALE BUTTONS NIE ZACHOWUJA
-     * ODPOWIEDNIEGO KSZTALTU. W IMAGEVIEW XML SA STATYCZNE Z TEGO CO CZYTALEM I NIE DA RADY TEGO ZMIENIC
-     */
     public void setupDots(int dots){
         dotsLayout.removeAllViews();
         dotsLayout.setWeightSum(dots);
@@ -312,10 +308,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     1.0f
             ));
-            //iv[i].setColorFilter(Color.RED);
             iv[i].setId(i);
             dotsLayout.addView(iv[i]);
         }
+    }
+
+    /*
+     * Works only with 4 dots for now
+     */
+    public void higlightDot(int num){
+            iv[num].setColorFilter(Color.RED);
+            if(num!=0) iv[num-1].setColorFilter(null);
+            else iv[getDotsNumber()].setColorFilter(null);
     }
 
     public void setDot(Integer num)
@@ -563,7 +567,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             /*
              * setValue oesn't work properly. Not setting number of dots
              */
-            numberPicker.setValue(getDots());
+            numberPicker.setValue(getDotsNumber());
             Log.d("PickMetrumDialog", "On Create Dialog method...");
             builder.setTitle(R.string.metrum_dialog)
                     .setView(view)
