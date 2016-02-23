@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.IBinder;
@@ -30,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     LinearLayout dotsLayout;
     ImageView dot1, dot2, dot3, dot4, dot00;
+    private ImageView[] iv;
     int dots = 3;
 
     private final static int maxBpm = 200;
@@ -259,6 +262,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
     }
 
+    public int getDots(){ return dots; }
+
     private void updateBpmViewAndService(int beatsPerMinute){
         bpmTextView.setText("" + (beatsPerMinute));
         tempoTextView.setText(assignTempo(beatsPerMinute));
@@ -298,16 +303,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void setupDots(int dots){
         dotsLayout.removeAllViews();
         dotsLayout.setWeightSum(dots);
+        iv = new ImageView[dots];
         for (int i = 0; i < dots; i++){
-            ImageView iv = new ImageView(this);
-            iv.setImageResource(R.drawable.dot_base);
-            iv.setLayoutParams(new LinearLayout.LayoutParams(
+            iv[i] = new ImageView(this);
+            iv[i].setImageResource(R.drawable.dot_base);
+            iv[i].setLayoutParams(new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     1.0f
             ));
-            iv.setId(i);
-            dotsLayout.addView(iv);
+            //iv[i].setColorFilter(Color.RED);
+            iv[i].setId(i);
+            dotsLayout.addView(iv[i]);
         }
     }
 
@@ -381,9 +388,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 tapBpm();
                 break;
             case R.id.fab2:
-                dots = 4;
-                setupDots(dots);
-                Toast.makeText(this, "FAB 2", Toast.LENGTH_SHORT).show();
+//                dots = 4;
+//                setupDots(dots);
+                DialogFragment dialogFragment = new PickMetrumDialogFragment();
+                dialogFragment.show(getSupportFragmentManager(), "Picker");
                 break;
         }
     }
@@ -459,6 +467,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private String assignTempo(int bpm){
+        // italian constant names of tempo
         if(bpm >= 30 && bpm < 40) return "Grave";
         else if(bpm >= 40 && bpm < 50) return "Largo";
         else if(bpm >= 50 && bpm < 60) return "Lento";
@@ -541,6 +550,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
+    public class PickMetrumDialogFragment extends DialogFragment{
+        NumberPicker numberPicker;
+
+        public Dialog onCreateDialog(Bundle savedInstanceState){
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+            final View view = layoutInflater.inflate(R.layout.dialog_metrum_picker, null);
+            numberPicker = (NumberPicker)view.findViewById(R.id.numberPicker);
+            numberPicker.setMaxValue(6);
+            numberPicker.setMinValue(1);
+            /*
+             * setValue oesn't work properly. Not setting number of dots
+             */
+            numberPicker.setValue(getDots());
+            Log.d("PickMetrumDialog", "On Create Dialog method...");
+            builder.setTitle(R.string.metrum_dialog)
+                    .setView(view)
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener(){
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            setupDots(numberPicker.getValue());
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                        }
+                    });
+            return builder.create();
+        }
+    }
+
     public class PickBpmDialogFragment extends DialogFragment{
         EditText bpmPicker;
         int temp;
@@ -553,26 +594,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             LayoutInflater layoutInflater = getActivity().getLayoutInflater();
             final View view = layoutInflater.inflate(R.layout.dialog_bpm_picker, null);
 
-            builder.setTitle("Pick up tempo")
+            builder.setTitle(R.string.bpm_dialog)
                     .setView(view)
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             bpmPicker = (EditText)view.findViewById(R.id.dialog_bpm_picker_editText);
                             temp = Integer.valueOf(bpmPicker.getText().toString());
 
                             if (temp > 200) {
                                 bpm = 200;
-                                Toast.makeText(getApplicationContext(), "To high bpm", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), R.string.high_bpm, Toast.LENGTH_SHORT).show();
                             }
                             else if (temp < 30) {
                                 bpm = 30;
-                                Toast.makeText(getApplicationContext(), "To low bpm", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), R.string.low_bpm, Toast.LENGTH_SHORT).show();
                             }
                             else bpm = temp;
                             updateBpmViewAndService(bpm);
                         }
                     })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             // User cancelled the dialog
                         }
