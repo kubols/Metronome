@@ -17,6 +17,7 @@ public class BeepService extends Service {
     //private final AtomicBoolean running = new AtomicBoolean(false);
     private int bpm = 90;
     public int dotNumber = 0;
+    public int dotsNumber = 3;
     private boolean work = false;
 
 
@@ -90,7 +91,7 @@ public class BeepService extends Service {
                         playMedia();
                         Intent intent = new Intent();
                         intent.putExtra("result", dotNumber);
-                        dotNumber = (dotNumber + 1) % 4;
+                        dotNumber = (dotNumber + 1) % dotsNumber;
                         intent.setAction("pl.edu.uksw.metronome.Broadcast");
                         sendBroadcast(intent);
                     }
@@ -132,6 +133,8 @@ public class BeepService extends Service {
     public void setWork(boolean work){
         this.work = work;
     }
+
+    public void setDotsNumber(Integer number) {this.dotsNumber = number;}
 
 //    public boolean getRunning(){
 //        if(running.get()) return true;
