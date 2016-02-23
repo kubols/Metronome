@@ -12,4 +12,6 @@
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
     </style>
 
+    <style name="HistoryHeader" parent="Base.TextAppearance.AppCompat.Subhead"></style>
+
 </resources>

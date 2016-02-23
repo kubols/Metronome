@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -90,12 +91,28 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
                 if(sec > 0)
                     lastedtime += Long.toString(sec)+"s"+" ";
 
-                TextView date = new TextView(this);
-                date.setText(sumhistory[count].substring(0, 10) + " " + lastedtime + System.getProperty("line.separator"));
-                date.setId(count);
-                date.setOnClickListener(this);
-                linearLayout.addView(date);
+//                LinearLayout dateLastedLayout = new LinearLayout(this);
+//                TextView date = (TextView)findViewById(R.id.date);
+//                date.setText(sumhistory[count].substring(0, 10) + "\n");
+//                date.setTextSize(TypedValue.COMPLEX_UNIT_SP, 17);
 
+//                date.setText(sumhistory[count].substring(0, 10) + " " + lastedtime + "\n");
+//                date.setId(count);
+//                date.setOnClickListener(this);
+//                linearLayout.addView(date);
+//
+//                TextView lasted = new TextView(this);
+//                lasted.setText(lastedtime + "\n");
+//                lasted.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13);
+//
+//                dateLastedLayout.setOrientation(LinearLayout.VERTICAL);
+//                dateLastedLayout.addView(date);
+//                dateLastedLayout.addView(lasted);
+//                dateLastedLayout.setId(count);
+//                dateLastedLayout.setOnClickListener(this);
+
+                LinearLayout my = new HistoryHeaderLayout(this, sumhistory[count].substring(0, 10), lastedtime);
+                linearLayout.addView(my);
                 count++;
             }
         }
