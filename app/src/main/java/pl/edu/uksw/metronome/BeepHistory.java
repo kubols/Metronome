@@ -1,6 +1,5 @@
 package pl.edu.uksw.metronome;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -12,11 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.view.animation.TranslateAnimation;
 import android.widget.LinearLayout;
-import android.widget.TextSwitcher;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 /**
@@ -38,6 +34,10 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
     Integer todel = 0;
     Integer tmpid = -1;
 
+    private final static String SUBHEAD = "subhead";
+    LinearLayout my;
+    //RelativeLayout my;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,11 +52,6 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
         actionBar.setDisplayHomeAsUpEnabled(true);
 
         LinearLayout linearLayout = (LinearLayout)findViewById(R.id.history);
-
-
-
-
-
 
         // OPEN DB
         dbhelp = new DBOpenHelper(this);
@@ -90,12 +85,11 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
                 if(sec > 0)
                     lastedtime += Long.toString(sec)+"s"+" ";
 
-                TextView date = new TextView(this);
-                date.setText(sumhistory[count].substring(0, 10) + " " + lastedtime + System.getProperty("line.separator"));
-                date.setId(count);
-                date.setOnClickListener(this);
-                linearLayout.addView(date);
-
+                // add new layout with id (count) and two textViews
+                my = new HistoryHeaderLayout(this, sumhistory[count].substring(0, 10), getString(R.string.summary) + " " + lastedtime);
+                my.setId(count);
+                my.setOnClickListener(this);
+                linearLayout.addView(my);
                 count++;
             }
         }
@@ -105,31 +99,30 @@ public class BeepHistory extends AppCompatActivity implements View.OnClickListen
     }
 
     public void onClick(View v) {
-        LinearLayout linearLayout = (LinearLayout)findViewById(R.id.history);
-        TextView tmp = (TextView)v;
-        String tmpdate = tmp.getText().toString();
-        tmpdate = tmpdate.substring(0, 10);
+        LinearLayout tmpLayout = (LinearLayout)v;                           // clicked linear layout
+        //RelativeLayout tmpLayout = (RelativeLayout)v;
+        View child = tmpLayout.findViewWithTag(SUBHEAD);                   // find View from parent layout
+        TextView tmp = (TextView)child;                                   // assign textView from child
+        String tmpdate = tmp.getText().toString();                       // get String from Header textView
 
         String history = viewAllEntries(tmpdate);
         if (history.equals(""))
             history = "No entries";
 
-       // tmp.append("costam costam witam panstwa");
         if(todelete != null)
         {
             mContainerView.removeView(todelete);
         }
 
-        if(tmp.getId() != tmpid) {
+        if(tmpLayout.getId() != tmpid) {
             final ViewGroup newView = (ViewGroup) LayoutInflater.from(this).inflate(
                     R.layout.list_item_example, mContainerView, false);
 
-            // Set the text in the new row to a random country.
-            ((TextView) newView.findViewById(android.R.id.text1)).setText(history);
-            Log.i("cos", Integer.toString(tmp.getId()));
-            mContainerView.addView(newView, tmp.getId() + 1);
+            // create new textView and set text from database
+            ((TextView)newView.findViewById(android.R.id.text1)).setText(history);
+            mContainerView.addView(newView, tmpLayout.getId() + 1);
             todelete = newView;
-            tmpid = tmp.getId();
+            tmpid = tmpLayout.getId();
         }
         else
         {

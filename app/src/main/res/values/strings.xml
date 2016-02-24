@@ -4,6 +4,9 @@
     <string name="bpm_dialog">Pick up BPM</string>
     <string name="high_bpm">Bpm too high</string>
     <string name="low_bpm">Bpm too low</string>
-    <string name="ok">Ok</string>
-    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="cancel">CANCEL</string>
+
+    <!-- BeepHistory Strings -->
+    <string name="summary">Time: </string>
 </resources>

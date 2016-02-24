@@ -15,15 +15,7 @@
         android:elevation="4dp"
         app:theme="@style/CustomToolbar"/>
 
-    <LinearLayout
-        android:id="@+id/dotsLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:paddingTop="@dimen/activity_horizontal_margin">
 
-    </LinearLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -34,9 +26,18 @@
         android:clickable="true"
         android:onClick="start_stop">
 
-
+        <LinearLayout
+            android:id="@+id/dotsLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_above="@+id/metronome_relative_layout"
+            android:layout_marginBottom="@dimen/activity_horizontal_margin">
+        </LinearLayout>
 
         <RelativeLayout
+            android:id="@+id/metronome_relative_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
