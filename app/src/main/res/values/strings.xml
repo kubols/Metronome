@@ -6,6 +6,10 @@
     <string name="low_bpm">Bpm too low</string>
     <string name="ok">OK</string>
     <string name="cancel">CANCEL</string>
+    <string name="silent_on">Silent mode is on</string>
+    <string name="silent_off">Silent mode is off</string>
+    <string name="app_hint">Tap anywhere to play</string>
+    <string name="tap_tempo">Tap tempo</string>
 
     <!-- BeepHistory Strings -->
     <string name="summary">Time: </string>

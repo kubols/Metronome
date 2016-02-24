@@ -15,7 +15,6 @@ import android.graphics.Color;
 import android.media.AudioManager;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.SystemClock;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -118,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // If this is the first run of the application
         if (!prefs.getBoolean("AppWasUsed", false)) {
-            Toast.makeText(this, "Tap anywhere to play", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.app_hint, Toast.LENGTH_LONG).show();
             prefs.edit().putBoolean("AppWasUsed", true).commit();
         }
 
@@ -239,8 +238,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onReceive(Context context, Intent intent) {
             result = intent.getIntExtra("result",result);
-            Log.i("cos", Integer.toString(result));
-            higlightDot(result);
+            Log.i("Broadcast", Integer.toString(result));
+            highlightDot(result);
         }
     };
 
@@ -348,8 +347,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /*
      * Works only with 4 dots for now
      */
-    public void higlightDot(int num){
-            Log.i("numerk",Integer.toString(num));
+    public void highlightDot(int num){
+            Log.i("highlightDot",Integer.toString(num));
             iv[num].setColorFilter(Color.RED);
             if(num!=0) iv[num-1].setColorFilter(null);
             else iv[getDotsNumber()-1].setColorFilter(null);
@@ -387,7 +386,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 lastedtime = "";
                 work = false;
                 beepService.setWork(work);
-                //beepService.playBeep(work, bpm);
             }
         }
     }
@@ -400,13 +398,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.fab1:
                 if (startBpm == 0) {
-                    Toast.makeText(this, "Tap tempo", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.tap_tempo, Toast.LENGTH_SHORT).show();
                 }
                 tapBpm();
                 break;
             case R.id.fab2:
-//                dots = 4;
-//                setupDots(dots);
                 DialogFragment dialogFragment = new PickMetrumDialogFragment();
                 dialogFragment.show(getSupportFragmentManager(), "Picker");
                 break;
@@ -416,16 +412,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
                     isSilent = false;
                     silentImage.setImageResource(R.drawable.ic_notifications_off);
-                    Toast.makeText(this, "Silent mode is off", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.silent_off, Toast.LENGTH_LONG).show();
                 }
                 else
                 {
                     am.setRingerMode(AudioManager.RINGER_MODE_SILENT);
                     isSilent = true;
                     silentImage.setImageResource(R.drawable.ic_notifications);
-                    Toast.makeText(this, "Silent mode is on", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, R.string.silent_on, Toast.LENGTH_LONG).show();
                 }
-
                 break;
         }
     }
@@ -480,26 +475,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     public void setBpmManually(View view){
-        /*AlertDialog.Builder builder = new AlertDialog.Builder(getApplication());
-        builder.setTitle("Set tempo").setMessage("Press");
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                bpm = 100;
-                bpmTextView.setText("" + (bpm));
-                tempoTextView.setText(assignTempo(bpm));
-                beepService.setBpm(bpm);
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();*/
-
         DialogFragment dialog = new PickBpmDialogFragment();
         dialog.show(getSupportFragmentManager(), "Dialog");
     }
@@ -517,7 +492,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else if(bpm >= 168 && bpm < 176) return "Vivace";
         else if(bpm >= 176 && bpm <= 200) return "Presto";
         else return "null";
-
     }
 
     public void insertEntry() {
@@ -528,7 +502,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             cv.put(DBOpenHelper.lasted, lastedtime);
             cv.put(DBOpenHelper.lastedseconds, time);
             db.insert(DBOpenHelper.TABLE_NAME, null, cv);
-            Log.d("cos", "a new entry was inserted:");
+            Log.d(LOG, "a new entry was inserted:");
         }
     }
 
@@ -598,9 +572,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             numberPicker = (NumberPicker)view.findViewById(R.id.numberPicker);
             numberPicker.setMaxValue(6);
             numberPicker.setMinValue(1);
-            /*
-             * setValue oesn't work properly. Not setting number of dots
-             */
             numberPicker.setValue(getDotsNumber());
             Log.d("PickMetrumDialog", "On Create Dialog method...");
             builder.setTitle(R.string.metrum_dialog)
