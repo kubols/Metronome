@@ -13,7 +13,7 @@
     <color name="colorSmallFabSelectedV21">#E65100</color>
 
     <color name="textPrimary">#87000000</color>
-    <color name="textSecondary">#54000000</color>
+    <color name="textSecondary">#ff9800</color>
     <color name="disabled">#38000000</color>
     <color name="primary_text_material_light">#ffffff</color>
 </resources>

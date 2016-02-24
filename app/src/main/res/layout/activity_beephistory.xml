@@ -29,18 +29,6 @@
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin"
             android:id="@+id/history">
-            <TextView
-                android:id="@+id/date"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Data"
-                android:textSize="16sp"/>
-            <TextView
-                android:id="@+id/lasted"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Lasted 20s"
-                android:textSize="12sp"/>
 
         </LinearLayout>
     </ScrollView>
