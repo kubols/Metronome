@@ -120,11 +120,16 @@
             android:elevation="6dp"
             android:background="@drawable/small_fab"
             android:visibility="invisible">
-            <ImageView
+            <TextView
+                android:id="@+id/fab2text"
                 android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_centerInParent="true"
-                android:src="@drawable/ic_new"/>
+                android:layout_height="34dp"
+                android:textColor="#FFF"
+                android:textSize="34sp"
+                android:layout_marginLeft="19dp"
+                android:layout_marginTop="5dp"
+                android:text="3" />
+
         </RelativeLayout>
 
         <RelativeLayout
