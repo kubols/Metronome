@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -48,12 +49,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
 
+
     private static String LOG = "MetronomeApp";
     private static String BPM_NAME = "bpm";
     private static String WORKING_NAME = "working";
     private boolean work = false;
     TextView bpmTextView;
     TextView tempoTextView;
+    TextView fab2text;
 
 
     private int mInterval = 5000; // 5 seconds by default, can be changed later
@@ -109,11 +112,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         registerReceiver(broadcast, filter);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        SharedPreferences prefs = this.getSharedPreferences("pl.edu.uksw.metronome", Context.MODE_PRIVATE);
+
+        // If this is the first run of the application
+        if (!prefs.getBoolean("AppWasUsed", false)) {
+            Toast.makeText(this, "Tap anywhere to play", Toast.LENGTH_LONG).show();
+            prefs.edit().putBoolean("AppWasUsed", true).commit();
+        }
 
 
         am = (AudioManager) getBaseContext().getSystemService(Context.AUDIO_SERVICE);
 
         silentImage = (ImageView)findViewById(R.id.silentMode);
+        fab2text = (TextView)findViewById(R.id.fab2text);
 
         // set up toolbar
         Toolbar myToolbar = (Toolbar)findViewById(R.id.my_toolbar);
@@ -258,6 +271,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onStop() {
+        am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         super.onStop();
         if (serviceConnected) {
             unbindService(connection);
@@ -268,6 +282,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onDestroy() {
+        am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         if (serviceConnected) {
             unbindService(connection);
             stopService(new Intent(this, BeepService.class));           // service is stopped only when application is completely closed
@@ -595,6 +610,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         public void onClick(DialogInterface dialog, int id) {
                             setupDots(numberPicker.getValue(), false);
                             dots = numberPicker.getValue();
+                            fab2text.setText(Integer.toString(dots));
                         }
                     })
                     .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
