@@ -121,14 +121,14 @@
             android:background="@drawable/small_fab"
             android:visibility="invisible">
             <TextView
+                android:layout_centerInParent="true"
+                android:gravity="center"
                 android:id="@+id/fab2text"
-                android:layout_width="28dp"
-                android:layout_height="34dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:textColor="#FFF"
-                android:textSize="34sp"
-                android:layout_marginLeft="19dp"
-                android:layout_marginTop="5dp"
-                android:text="3" />
+                android:textSize="28sp"
+                android:text="3"/>
 
         </RelativeLayout>
 
