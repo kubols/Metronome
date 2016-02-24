@@ -11,8 +11,10 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -66,11 +68,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ImageButton decrementButton;
 
     private Animation fab_open, fab_close, rotate_forward, rotate_backward;
-    RelativeLayout fabMore, fab1, fab2;
+    RelativeLayout fabMore, fab1, fab2, fab3;
     private boolean isFabOpened;
 
     LinearLayout dotsLayout;
-    ImageView dot1, dot2, dot3, dot4, dot00;
+    ImageView dot1, dot2, dot3, dot4, dot5, dot6;
     private ImageView[] iv;
     int dots = 3;
 
@@ -97,6 +99,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Integer dotCounter = 0;
     Integer result = 0;
 
+    AudioManager am;
+    boolean isSilent = false;
+    ImageView silentImage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,26 +110,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         registerReceiver(broadcast, filter);
 
+
+        am = (AudioManager) getBaseContext().getSystemService(Context.AUDIO_SERVICE);
+
+        silentImage = (ImageView)findViewById(R.id.silentMode);
+
         // set up toolbar
         Toolbar myToolbar = (Toolbar)findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-        dot1 = (ImageView)findViewById(R.id.dot1);
-        dot2 = (ImageView)findViewById(R.id.dot2);
-        dot3 = (ImageView)findViewById(R.id.dot3);
-        dot4 = (ImageView)findViewById(R.id.dot4);
+
 
         dotsLayout = (LinearLayout)findViewById(R.id.dotsLayout);
-        setupDots(dots);
+        setupDots(dots,true);
 
         //floating action button animations
         fabMore = (RelativeLayout)findViewById(R.id.fab_more);
         fab1 = (RelativeLayout)findViewById(R.id.fab1);
         fab2 = (RelativeLayout)findViewById(R.id.fab2);
+        fab3 = (RelativeLayout)findViewById(R.id.fab3);
+
 
         fabMore.setOnClickListener(this);
         fab1.setOnClickListener(this);
         fab2.setOnClickListener(this);
+        fab3.setOnClickListener(this);
+
 
         rotate_forward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_forward);
         rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_backward);
@@ -140,6 +152,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         tempoTextView = (TextView)findViewById(R.id.tempo);
         tempoTextView.setText(assignTempo(bpm));
+
+
+
 
         /*
          * increment button listeners
@@ -212,7 +227,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         public void onReceive(Context context, Intent intent) {
             result = intent.getIntExtra("result",result);
             Log.i("cos", Integer.toString(result));
-            setDot(result);
             higlightDot(result);
         }
     };
@@ -265,6 +279,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public int getDotsNumber(){ return dots; }
 
     private void updateBpmViewAndService(int beatsPerMinute){
+        Log.i("bpm", Integer.toString(beatsPerMinute));
         bpmTextView.setText("" + (beatsPerMinute));
         tempoTextView.setText(assignTempo(beatsPerMinute));
         beepService.setBpm(beatsPerMinute);
@@ -296,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void setupDots(int dots){
+    public void setupDots(int dots, boolean isFirst){
         dotsLayout.removeAllViews();
         dotsLayout.setWeightSum(dots);
         iv = new ImageView[dots];
@@ -311,35 +326,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             iv[i].setId(i);
             dotsLayout.addView(iv[i]);
         }
+        if(!isFirst)
+            beepService.setDotsNumber(dots);
     }
 
     /*
      * Works only with 4 dots for now
      */
     public void higlightDot(int num){
+            Log.i("numerk",Integer.toString(num));
             iv[num].setColorFilter(Color.RED);
             if(num!=0) iv[num-1].setColorFilter(null);
-            else iv[getDotsNumber()].setColorFilter(null);
-    }
-
-    public void setDot(Integer num)
-    {
-        if(num == 0) {
-            dot4.setImageResource(R.drawable.dot);
-            dot1.setImageResource(R.drawable.dot2);
-        }
-        else if(num == 1) {
-            dot1.setImageResource(R.drawable.dot);
-            dot2.setImageResource(R.drawable.dot2);
-        }
-        else if(num == 2) {
-            dot2.setImageResource(R.drawable.dot);
-            dot3.setImageResource(R.drawable.dot2);
-        }
-        else if(num == 3) {
-            dot3.setImageResource(R.drawable.dot);
-            dot4.setImageResource(R.drawable.dot2);
-        }
+            else iv[getDotsNumber()-1].setColorFilter(null);
     }
 
     /*
@@ -397,6 +395,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 DialogFragment dialogFragment = new PickMetrumDialogFragment();
                 dialogFragment.show(getSupportFragmentManager(), "Picker");
                 break;
+            case R.id.fab3:
+                if(isSilent)
+                {
+                    am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                    isSilent = false;
+                    silentImage.setImageResource(R.drawable.ic_notifications_off);
+                    Toast.makeText(this, "Silent mode is off", Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    am.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                    isSilent = true;
+                    silentImage.setImageResource(R.drawable.ic_notifications);
+                    Toast.makeText(this, "Silent mode is on", Toast.LENGTH_LONG).show();
+                }
+
+                break;
         }
     }
 
@@ -405,16 +420,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             fabMore.startAnimation(rotate_backward);
             fab1.startAnimation(fab_close);
             fab2.startAnimation(fab_close);
+            fab3.startAnimation(fab_close);
             fab1.setClickable(false);
             fab2.setClickable(false);
+            fab3.setClickable(false);
             isFabOpened = false;
         }
         else {
             fabMore.startAnimation(rotate_forward);
             fab1.startAnimation(fab_open);
             fab2.startAnimation(fab_open);
+            fab3.startAnimation(fab_open);
             fab1.setClickable(true);
             fab2.setClickable(true);
+            fab3.setClickable(true);
             isFabOpened = true;
         }
     }
@@ -574,7 +593,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener(){
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
-                            setupDots(numberPicker.getValue());
+                            setupDots(numberPicker.getValue(), false);
+                            dots = numberPicker.getValue();
                         }
                     })
                     .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
