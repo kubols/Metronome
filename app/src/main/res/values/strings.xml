@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Metronome</string>
+    <string name="metrum_dialog">Pick up beats</string>
+    <string name="bpm_dialog">Pick up BPM</string>
+    <string name="high_bpm">Bpm too high</string>
+    <string name="low_bpm">Bpm too low</string>
+    <string name="ok">OK</string>
+    <string name="cancel">CANCEL</string>
+    <string name="silent_on">Silent mode is on</string>
+    <string name="silent_off">Silent mode is off</string>
+    <string name="app_hint">Tap anywhere to play</string>
+    <string name="tap_tempo">Tap tempo</string>
+
+    <!-- BeepHistory Strings -->
+    <string name="summary">Time: </string>
 </resources>
