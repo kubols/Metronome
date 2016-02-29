@@ -1,13 +1,18 @@
 package pl.edu.uksw.metronome;
 
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.DialogFragment;
@@ -23,9 +28,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +41,13 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+
+
+
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+
+
 
     private static String LOG = "MetronomeApp";
     private static String BPM_NAME = "bpm";
@@ -42,6 +55,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private boolean work = false;
     TextView bpmTextView;
     TextView tempoTextView;
+    TextView fab2text;
+
+
+    private int mInterval = 5000; // 5 seconds by default, can be changed later
+    private Handler mHandler;
+
 
     private Handler buttonHandler = new Handler();                  //handler to continuous increase or decrease bpm
     private static int DELAY = 70;                                  //delay time between runnable repeat
@@ -51,9 +70,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ImageButton decrementButton;
 
     private Animation fab_open, fab_close, rotate_forward, rotate_backward;
-    RelativeLayout fabMore, fab1, fab2;
+    RelativeLayout fabMore, fab1, fab2, fab3;
     private boolean isFabOpened;
 
+    LinearLayout dotsLayout;
+    ImageView dot1, dot2, dot3, dot4, dot5, dot6;
+    private ImageView[] iv;
+    int dots = 3;
+
+    private final static int maxBpm = 200;
+    private final static int minBpm = 30;
     int bpm = 0;
 
     BeepService beepService = null;                                 //reference to service, initialized on connection to service
@@ -63,30 +89,65 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     long stop;
     long time;
 
+    long startBpm;
+    long tapBpm;
+
     private SQLiteDatabase db;
     private DBOpenHelper dbhelp;
 
     DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm");
     String datestart = "";
     String lastedtime = "";
+    Integer dotCounter = 0;
+    Integer result = 0;
+
+    AudioManager am;
+    boolean isSilent = false;
+    ImageView silentImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        registerReceiver(broadcast, filter);
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+        SharedPreferences prefs = this.getSharedPreferences("pl.edu.uksw.metronome", Context.MODE_PRIVATE);
+
+        // If this is the first run of the application
+        if (!prefs.getBoolean("AppWasUsed", false)) {
+            Toast.makeText(this, R.string.app_hint, Toast.LENGTH_LONG).show();
+            prefs.edit().putBoolean("AppWasUsed", true).commit();
+        }
+
+
+        am = (AudioManager) getBaseContext().getSystemService(Context.AUDIO_SERVICE);
+
+        silentImage = (ImageView)findViewById(R.id.silentMode);
+        fab2text = (TextView)findViewById(R.id.fab2text);
+
         // set up toolbar
         Toolbar myToolbar = (Toolbar)findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+
+
+
+        dotsLayout = (LinearLayout)findViewById(R.id.dotsLayout);
+        setupDots(dots,true);
 
         //floating action button animations
         fabMore = (RelativeLayout)findViewById(R.id.fab_more);
         fab1 = (RelativeLayout)findViewById(R.id.fab1);
         fab2 = (RelativeLayout)findViewById(R.id.fab2);
+        fab3 = (RelativeLayout)findViewById(R.id.fab3);
+
 
         fabMore.setOnClickListener(this);
         fab1.setOnClickListener(this);
         fab2.setOnClickListener(this);
+        fab3.setOnClickListener(this);
+
 
         rotate_forward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_forward);
         rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_backward);
@@ -103,6 +164,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         tempoTextView = (TextView)findViewById(R.id.tempo);
         tempoTextView.setText(assignTempo(bpm));
+
+
+
 
         /*
          * increment button listeners
@@ -167,6 +231,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+
+    private IntentFilter filter = new IntentFilter("pl.edu.uksw.metronome.Broadcast");
+
+    public BroadcastReceiver broadcast = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            result = intent.getIntExtra("result",result);
+            Log.i("Broadcast", Integer.toString(result));
+            highlightDot(result);
+        }
+    };
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
@@ -188,11 +264,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onStart();
         bindService(new Intent(this, BeepService.class), connection, Context.BIND_AUTO_CREATE);
         startService(new Intent(this, BeepService.class));
+
         Log.d(LOG, "onStart");
     }
 
     @Override
     protected void onStop() {
+        am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         super.onStop();
         if (serviceConnected) {
             unbindService(connection);
@@ -203,6 +281,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     protected void onDestroy() {
+        am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
         if (serviceConnected) {
             unbindService(connection);
             stopService(new Intent(this, BeepService.class));           // service is stopped only when application is completely closed
@@ -211,15 +290,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onDestroy();
     }
 
+    public int getDotsNumber(){ return dots; }
+
+    private void updateBpmViewAndService(int beatsPerMinute){
+        Log.i("bpm", Integer.toString(beatsPerMinute));
+        bpmTextView.setText("" + (beatsPerMinute));
+        tempoTextView.setText(assignTempo(beatsPerMinute));
+        beepService.setBpm(beatsPerMinute);
+    }
+
+    private void updateBpmViewAndService(long beatsPerMinute){
+        bpmTextView.setText("" + (beatsPerMinute));
+        tempoTextView.setText(assignTempo((int) beatsPerMinute));
+        beepService.setBpm((int) beatsPerMinute);
+    }
+
     /*
      * Faster bpm button
      */
     public void increment(){
         if(bpm >= 30 && bpm < 200) {
             bpm++;
-            bpmTextView.setText("" + (bpm));
-            tempoTextView.setText(assignTempo(bpm));
-            beepService.setBpm(bpm);
+            updateBpmViewAndService(bpm);
         }
     }
 
@@ -229,10 +321,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void decrement(){
         if(bpm > 30 && bpm <= 200) {
             bpm--;
-            bpmTextView.setText("" + (bpm));
-            tempoTextView.setText(assignTempo(bpm));
-            beepService.setBpm(bpm);
+            updateBpmViewAndService(bpm);
         }
+    }
+
+    public void setupDots(int dots, boolean isFirst){
+        dotsLayout.removeAllViews();
+        dotsLayout.setWeightSum(dots);
+        iv = new ImageView[dots];
+        for (int i = 0; i < dots; i++){
+            iv[i] = new ImageView(this);
+            iv[i].setImageResource(R.drawable.dot_base);
+            iv[i].setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    1.0f
+            ));
+            iv[i].setId(i);
+            dotsLayout.addView(iv[i]);
+        }
+        if(!isFirst)
+            beepService.setDotsNumber(dots);
+    }
+
+    /*
+     * Works only with 4 dots for now
+     */
+    public void highlightDot(int num){
+            Log.i("highlightDot",Integer.toString(num));
+            iv[num].setColorFilter(Color.RED);
+            if(num!=0) iv[num-1].setColorFilter(null);
+            else iv[getDotsNumber()-1].setColorFilter(null);
     }
 
     /*
@@ -242,10 +361,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(beepService != null){
             // if metronome is not ticking, start
             if(!work) {
+                work = true;
                 start = System.currentTimeMillis();
                 datestart = df.format(Calendar.getInstance().getTime());
-
-                work = true;
                 beepService.playBeep(work, bpm);
             }
             else {
@@ -268,7 +386,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 lastedtime = "";
                 work = false;
                 beepService.setWork(work);
-                //beepService.playBeep(work, bpm);
             }
         }
     }
@@ -280,10 +397,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 animateFAB();
                 break;
             case R.id.fab1:
-                Toast.makeText(this, "FAB 1", Toast.LENGTH_SHORT).show();
+                if (startBpm == 0) {
+                    Toast.makeText(this, R.string.tap_tempo, Toast.LENGTH_SHORT).show();
+                }
+                tapBpm();
                 break;
             case R.id.fab2:
-                Toast.makeText(this, "FAB 2", Toast.LENGTH_SHORT).show();
+                DialogFragment dialogFragment = new PickMetrumDialogFragment();
+                dialogFragment.show(getSupportFragmentManager(), "Picker");
+                break;
+            case R.id.fab3:
+                if(isSilent)
+                {
+                    am.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+                    isSilent = false;
+                    silentImage.setImageResource(R.drawable.ic_notifications_off);
+                    Toast.makeText(this, R.string.silent_off, Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    am.setRingerMode(AudioManager.RINGER_MODE_SILENT);
+                    isSilent = true;
+                    silentImage.setImageResource(R.drawable.ic_notifications);
+                    Toast.makeText(this, R.string.silent_on, Toast.LENGTH_LONG).show();
+                }
+                break;
         }
     }
 
@@ -292,46 +430,57 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             fabMore.startAnimation(rotate_backward);
             fab1.startAnimation(fab_close);
             fab2.startAnimation(fab_close);
+            fab3.startAnimation(fab_close);
             fab1.setClickable(false);
             fab2.setClickable(false);
+            fab3.setClickable(false);
             isFabOpened = false;
         }
         else {
             fabMore.startAnimation(rotate_forward);
             fab1.startAnimation(fab_open);
             fab2.startAnimation(fab_open);
+            fab3.startAnimation(fab_open);
             fab1.setClickable(true);
             fab2.setClickable(true);
+            fab3.setClickable(true);
             isFabOpened = true;
         }
     }
 
+    private void tapBpm(){
+
+        if(startBpm == 0) {
+            startBpm = System.currentTimeMillis();
+        }
+        else if ((System.currentTimeMillis() - startBpm)/1000 > 2){
+            startBpm = System.currentTimeMillis();
+        }
+        else {
+            tapBpm = 60000/(System.currentTimeMillis() - startBpm);
+            startBpm = System.currentTimeMillis();
+            if (tapBpm >= minBpm && tapBpm <= maxBpm) {
+                bpm = (int)tapBpm;
+                updateBpmViewAndService(bpm);
+            }
+            else if (tapBpm > maxBpm){
+                bpm = maxBpm;
+                updateBpmViewAndService(bpm);
+            }
+            else if (tapBpm < minBpm){
+                bpm = minBpm;
+                updateBpmViewAndService(bpm);
+            }
+        }
+    }
+
     public void setBpmManually(View view){
-        /*AlertDialog.Builder builder = new AlertDialog.Builder(getApplication());
-        builder.setTitle("Set tempo").setMessage("Press");
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                bpm = 100;
-                bpmTextView.setText("" + (bpm));
-                tempoTextView.setText(assignTempo(bpm));
-                beepService.setBpm(bpm);
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-
-            }
-        });
-        AlertDialog dialog = builder.create();
-        dialog.show();*/
-
         DialogFragment dialog = new PickBpmDialogFragment();
         dialog.show(getSupportFragmentManager(), "Dialog");
     }
 
     private String assignTempo(int bpm){
+        // italian constant names of tempo
         if(bpm >= 30 && bpm < 40) return "Grave";
         else if(bpm >= 40 && bpm < 50) return "Largo";
         else if(bpm >= 50 && bpm < 60) return "Lento";
@@ -343,7 +492,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         else if(bpm >= 168 && bpm < 176) return "Vivace";
         else if(bpm >= 176 && bpm <= 200) return "Presto";
         else return "null";
-
     }
 
     public void insertEntry() {
@@ -354,7 +502,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             cv.put(DBOpenHelper.lasted, lastedtime);
             cv.put(DBOpenHelper.lastedseconds, time);
             db.insert(DBOpenHelper.TABLE_NAME, null, cv);
-            Log.d("cos", "a new entry was inserted:");
+            Log.d(LOG, "a new entry was inserted:");
         }
     }
 
@@ -414,6 +562,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     };
 
+    public class PickMetrumDialogFragment extends DialogFragment{
+        NumberPicker numberPicker;
+
+        public Dialog onCreateDialog(Bundle savedInstanceState){
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            LayoutInflater layoutInflater = getActivity().getLayoutInflater();
+            final View view = layoutInflater.inflate(R.layout.dialog_metrum_picker, null);
+            numberPicker = (NumberPicker)view.findViewById(R.id.numberPicker);
+            numberPicker.setMaxValue(6);
+            numberPicker.setMinValue(1);
+            numberPicker.setValue(getDotsNumber());
+            Log.d("PickMetrumDialog", "On Create Dialog method...");
+            builder.setTitle(R.string.metrum_dialog)
+                    .setView(view)
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener(){
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            setupDots(numberPicker.getValue(), false);
+                            dots = numberPicker.getValue();
+                            fab2text.setText(Integer.toString(dots));
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                        }
+                    });
+            return builder.create();
+        }
+    }
+
     public class PickBpmDialogFragment extends DialogFragment{
         EditText bpmPicker;
         int temp;
@@ -426,29 +605,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             LayoutInflater layoutInflater = getActivity().getLayoutInflater();
             final View view = layoutInflater.inflate(R.layout.dialog_bpm_picker, null);
 
-            builder.setTitle("Pick up tempo")
+            builder.setTitle(R.string.bpm_dialog)
                     .setView(view)
-                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             bpmPicker = (EditText)view.findViewById(R.id.dialog_bpm_picker_editText);
                             temp = Integer.valueOf(bpmPicker.getText().toString());
 
                             if (temp > 200) {
                                 bpm = 200;
-                                Toast.makeText(getApplicationContext(), "To high bpm", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), R.string.high_bpm, Toast.LENGTH_SHORT).show();
                             }
                             else if (temp < 30) {
                                 bpm = 30;
-                                Toast.makeText(getApplicationContext(), "To low bpm", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), R.string.low_bpm, Toast.LENGTH_SHORT).show();
                             }
                             else bpm = temp;
-
-                            bpmTextView.setText("" + (bpm));
-                            tempoTextView.setText(assignTempo(bpm));
-                            beepService.setBpm(bpm);
+                            updateBpmViewAndService(bpm);
                         }
                     })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             // User cancelled the dialog
                         }

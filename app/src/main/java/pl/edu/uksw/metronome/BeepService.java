@@ -4,7 +4,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -14,7 +16,12 @@ public class BeepService extends Service {
     private static String LOG_S = "MetronomeService";
     //private final AtomicBoolean running = new AtomicBoolean(false);
     private int bpm = 90;
+    public int dotNumber = 0;
+    public int dotsNumber = 3;
     private boolean work = false;
+
+
+    Handler handler;
 
     /*
      * this class will return the Service instance, MetronomeBinder object will be returned on binding with the MainActivity
@@ -53,7 +60,7 @@ public class BeepService extends Service {
         if(work){
             Log.d(LOG_S, "beep, beep, beep " + bpm);
             setWork(work);
-            new Thread(new Runnable() {
+            /*new Thread(new Runnable() {
                 @Override
                 public void run() {
                     Log.d(LOG_S, "running... " + this);
@@ -61,13 +68,36 @@ public class BeepService extends Service {
                         Log.d(LOG_S, "inside loop - " + getWork() + " - status");
                         try {
                             playMedia();
+                            Intent intent = new Intent();
+                            intent.putExtra("result", dotNumber);
+                            dotNumber = (dotNumber+1)%4;
+                            intent.setAction("pl.edu.uksw.metronome.Broadcast");
+                            sendBroadcast(intent);
+
                             Thread.sleep(60000/ getBpm());
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                     }
                 }
-            }).start();
+            }).start();*/
+
+            handler = new Handler();
+            final Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    if(getWork()){
+                        handler.postDelayed(this, 60000 / getBpm());
+                        playMedia();
+                        Intent intent = new Intent();
+                        intent.putExtra("result", dotNumber);
+                        dotNumber = (dotNumber + 1) % dotsNumber;
+                        intent.setAction("pl.edu.uksw.metronome.Broadcast");
+                        sendBroadcast(intent);
+                    }
+                }
+            };
+            handler.post(r);
         }
         else {
             Log.d(LOG_S, "stop");
@@ -103,6 +133,8 @@ public class BeepService extends Service {
     public void setWork(boolean work){
         this.work = work;
     }
+
+    public void setDotsNumber(Integer number) {this.dotsNumber = number;}
 
 //    public boolean getRunning(){
 //        if(running.get()) return true;
