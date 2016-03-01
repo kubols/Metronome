@@ -14,7 +14,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BeepService extends Service {
 
     private static String LOG_S = "MetronomeService";
-    //private final AtomicBoolean running = new AtomicBoolean(false);
     private int bpm = 90;
     public int dotNumber = 0;
     public int dotsNumber = 3;
@@ -60,27 +59,6 @@ public class BeepService extends Service {
         if(work){
             Log.d(LOG_S, "beep, beep, beep " + bpm);
             setWork(work);
-            /*new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(LOG_S, "running... " + this);
-                    while(getWork()){
-                        Log.d(LOG_S, "inside loop - " + getWork() + " - status");
-                        try {
-                            playMedia();
-                            Intent intent = new Intent();
-                            intent.putExtra("result", dotNumber);
-                            dotNumber = (dotNumber+1)%4;
-                            intent.setAction("pl.edu.uksw.metronome.Broadcast");
-                            sendBroadcast(intent);
-
-                            Thread.sleep(60000/ getBpm());
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }).start();*/
 
             handler = new Handler();
             final Runnable r = new Runnable() {
@@ -90,8 +68,8 @@ public class BeepService extends Service {
                         handler.postDelayed(this, 60000 / getBpm());
                         playMedia();
                         Intent intent = new Intent();
-                        intent.putExtra("result", dotNumber);
-                        dotNumber = (dotNumber + 1) % dotsNumber;
+                        intent.putExtra("result", getDotNumber());
+                        setDotNumber((getDotNumber() + 1) % getDotsNumber());
                         intent.setAction("pl.edu.uksw.metronome.Broadcast");
                         sendBroadcast(intent);
                     }
@@ -102,7 +80,6 @@ public class BeepService extends Service {
         else {
             Log.d(LOG_S, "stop");
             setWork(false);
-            //running.set(false);
         }
     }
 
@@ -136,9 +113,10 @@ public class BeepService extends Service {
 
     public void setDotsNumber(Integer number) {this.dotsNumber = number;}
 
-//    public boolean getRunning(){
-//        if(running.get()) return true;
-//        else return false;
-//    }
+    public void setDotNumber(Integer number) {this.dotNumber = number;}
+
+    public Integer getDotsNumber() {return dotsNumber;}
+
+    public Integer getDotNumber() {return dotNumber;}
 
 }
