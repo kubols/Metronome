@@ -57,11 +57,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView tempoTextView;
     TextView fab2text;
 
-
-    private int mInterval = 5000; // 5 seconds by default, can be changed later
-    private Handler mHandler;
-
-
     private Handler buttonHandler = new Handler();                  //handler to continuous increase or decrease bpm
     private static int DELAY = 70;                                  //delay time between runnable repeat
     private boolean incrementing = false;
@@ -69,15 +64,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     ImageButton incrementButton;
     ImageButton decrementButton;
 
+    // Animations and layouts of Floating Action Buttons
     private Animation fab_open, fab_close, rotate_forward, rotate_backward;
     RelativeLayout fabMore, fab1, fab2, fab3;
     private boolean isFabOpened;
 
+    // Layout to store dynamic dots
     LinearLayout dotsLayout;
-    ImageView dot1, dot2, dot3, dot4, dot5, dot6;
     private ImageView[] iv;
     int dots = 3;
 
+    // restrictions for max and min tempo
     private final static int maxBpm = 200;
     private final static int minBpm = 30;
     int bpm = 0;
@@ -85,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     BeepService beepService = null;                                 //reference to service, initialized on connection to service
     boolean serviceConnected = false;                               //boolean variable if service is bounded
 
+    // times to store in history
     long start;
     long stop;
     long time;
@@ -98,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     DateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm");
     String datestart = "";
     String lastedtime = "";
-    Integer dotCounter = 0;
     Integer result = 0;
 
     AudioManager am;
@@ -115,12 +112,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         SharedPreferences prefs = this.getSharedPreferences("pl.edu.uksw.metronome", Context.MODE_PRIVATE);
 
-        // If this is the first run of the application
+        // If this is the first run of the application ever
         if (!prefs.getBoolean("AppWasUsed", false)) {
             Toast.makeText(this, R.string.app_hint, Toast.LENGTH_LONG).show();
             prefs.edit().putBoolean("AppWasUsed", true).commit();
         }
-
 
         am = (AudioManager) getBaseContext().getSystemService(Context.AUDIO_SERVICE);
 
@@ -131,24 +127,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar myToolbar = (Toolbar)findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-
-
+        // set up layout with dots
         dotsLayout = (LinearLayout)findViewById(R.id.dotsLayout);
-        setupDots(dots,true);
+        setupDots(dots,false);
 
-        //floating action button animations
+        //floating action buttons views
         fabMore = (RelativeLayout)findViewById(R.id.fab_more);
         fab1 = (RelativeLayout)findViewById(R.id.fab1);
         fab2 = (RelativeLayout)findViewById(R.id.fab2);
         fab3 = (RelativeLayout)findViewById(R.id.fab3);
 
-
+        // fab listeners
         fabMore.setOnClickListener(this);
         fab1.setOnClickListener(this);
         fab2.setOnClickListener(this);
         fab3.setOnClickListener(this);
 
-
+        // fab animations
         rotate_forward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_forward);
         rotate_backward = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.rotate_backward);
         fab_open = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fab_open);
@@ -159,14 +154,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dbhelp = new DBOpenHelper(this);
         db = dbhelp.getWritableDatabase();
 
+        // BPM layout init
         bpmTextView = (TextView)findViewById(R.id.bpmTextView);
         bpmTextView.setText("" + (bpm));
 
+        // Tempo layout init
         tempoTextView = (TextView)findViewById(R.id.tempo);
         tempoTextView.setText(assignTempo(bpm));
-
-
-
 
         /*
          * increment button listeners
@@ -230,7 +224,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
-
 
     private IntentFilter filter = new IntentFilter("pl.edu.uksw.metronome.Broadcast");
 
@@ -299,12 +292,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         beepService.setBpm(beatsPerMinute);
     }
 
-    private void updateBpmViewAndService(long beatsPerMinute){
-        bpmTextView.setText("" + (beatsPerMinute));
-        tempoTextView.setText(assignTempo((int) beatsPerMinute));
-        beepService.setBpm((int) beatsPerMinute);
-    }
-
     /*
      * Faster bpm button
      */
@@ -325,11 +312,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void setupDots(int dots, boolean isFirst){
+    // setup dots layout
+    public void setupDots(int dotsnum, boolean isCreated){
         dotsLayout.removeAllViews();
-        dotsLayout.setWeightSum(dots);
-        iv = new ImageView[dots];
-        for (int i = 0; i < dots; i++){
+        dotsLayout.setWeightSum(dotsnum);
+        iv = new ImageView[dotsnum];
+        for (int i = 0; i < dotsnum; i++){
             iv[i] = new ImageView(this);
             iv[i].setImageResource(R.drawable.dot_base);
             iv[i].setLayoutParams(new LinearLayout.LayoutParams(
@@ -340,13 +328,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             iv[i].setId(i);
             dotsLayout.addView(iv[i]);
         }
-        if(!isFirst)
-            beepService.setDotsNumber(dots);
+        /*
+         * if layout has been already created, modify service
+         * if not, that means the service isn't binded yet
+         */
+        if(isCreated) {
+            beepService.setDotsNumber(dotsnum);
+            beepService.setDotNumber(0);
+        }
     }
 
-    /*
-     * Works only with 4 dots for now
-     */
+    // highlight one dot at a time
     public void highlightDot(int num){
             Log.i("highlightDot",Integer.toString(num));
             iv[num].setColorFilter(Color.RED);
@@ -405,6 +397,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.fab2:
                 DialogFragment dialogFragment = new PickMetrumDialogFragment();
                 dialogFragment.show(getSupportFragmentManager(), "Picker");
+                beepService.setDotNumber(0);
                 break;
             case R.id.fab3:
                 if(isSilent)
@@ -579,8 +572,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener(){
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
-                            setupDots(numberPicker.getValue(), false);
                             dots = numberPicker.getValue();
+                            setupDots(dots, true);
                             fab2text.setText(Integer.toString(dots));
                         }
                     })
